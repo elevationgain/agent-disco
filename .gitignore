@@ -49,3 +49,4 @@ logs/
 
 # Design source files (Affinity Designer)
 logo/agent-disco.af
+logo/*.af~lock~

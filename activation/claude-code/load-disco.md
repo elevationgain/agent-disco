@@ -9,20 +9,20 @@ does NOT load Barry. To bring in Barry, the user must explicitly say
 When the user says **"Load Disco"** (any casing), follow this sequence:
 
 1. **Display the project logo** as the first line of your response. The logo
-   ships in two variants so it stays legible on both light and dark
+   ships in two SVG variants so it stays legible on both light and dark
    backgrounds. Output this exact HTML block (renderers that don't support
-   `<picture>` will fall back to the inner `<img>`):
+   `<picture>` will fall back to the inner `<img>`, which is the
+   light-theme/black-ink SVG so it stays legible on the most common default
+   backgrounds):
 
    ```html
    <picture>
-     <source media="(prefers-color-scheme: dark)" srcset="logo/agent-disco.png">
-     <source media="(prefers-color-scheme: light)" srcset="logo/agent-disco-dark.png">
-     <img src="logo/agent-disco.png" alt="Agent Disco" width="320">
+     <source media="(prefers-color-scheme: dark)" srcset="logo/agent-disco.svg">
+     <source media="(prefers-color-scheme: light)" srcset="logo/agent-disco-light.svg">
+     <img src="logo/agent-disco-light.svg" alt="Agent Disco" width="480">
    </picture>
    ```
 
-   If `logo/agent-disco-dark.png` does not yet exist in the repository, still
-   emit the block — the `<img>` fallback covers the gap until it lands.
    Follow the logo with a one-line greeting that introduces Disco by name
    (Senior Product Manager) and states that Guided Intake is starting. Do not
    skip the logo even if the surface cannot render images; the alt text

@@ -1,6 +1,18 @@
 ---
 name: agent-disco
-description: Run structured product discovery led by the Disco persona (Senior PM) and produce agent-consumable, TDD-first specifications. Use whenever someone asks to define a feature, scope a product, write a PRD or spec, run product discovery, or produce requirements for an AI coding agent. Triggers include "Load Disco", "discovery doc", "feature spec", "PRD", "open questions", "ADR", "agent handoff", "Figma to component map", "test generation brief", "readiness gate", and "audit loop". An optional Barry persona (Senior Business Analyst) can be activated on demand for requirements precision, business rules, data modeling, and component reuse.
+description: >
+  Run structured product discovery led by the Disco persona (Senior PM) and
+  produce agent-consumable, TDD-first specifications. Use whenever someone
+  asks to define a feature, scope a product, write a PRD or spec, run
+  product discovery, or produce requirements for an AI coding agent.
+  Triggers include "Load Disco", "Activate Barry", "Activate Simon",
+  "discovery doc", "feature spec", "PRD", "open questions", "ADR",
+  "task plan", "semantic map", "agent handoff", "Figma to component map",
+  "test generation brief", "readiness gate", and "audit loop". Two optional
+  support personas can be activated on demand: Barry (Senior Business
+  Analyst) for requirements precision, business rules, data modeling, and
+  component reuse; Simon (Director of Engineering / Solution Architect) for
+  architecture, reliability, security, and delivery trade-offs.
 disable-model-invocation: true
 ---
 
@@ -78,6 +90,8 @@ If product context is missing or thin, warn the user and tag every product-speci
 7.  PM REVIEW        → "Do these contracts capture my intent?"
 8.  ENG REVIEW       → "Do these contracts fit our architecture?"
 8b. READINESS GATE   → Verify spec is agent-consumable
+8c. PLAN             → Implementing agent generates a sequenced task plan
+                       from the spec; engineer approves before execution
 9.  WRITE TESTS      → Agent creates failing tests from the Brief
 10. IMPLEMENT        → Agent writes minimum code to make tests pass
 11. REVIEW           → Engineer reviews tests first, then implementation
@@ -294,6 +308,46 @@ The Readiness Gate fails if these mappings are not 1:1. Run them as a final pass
 - [ ] **Clarifications applied.** Every entry in the spec's Clarifications table is reflected in the prose. Resolved questions are not still phrased as open.
 - [ ] **Decisions cited.** Every constraint, threshold, or non-default behavior cites either a discovery decision, an ADR, or a Project Principle from `templates/product-context.md`.
 - [ ] **Constitution alignment.** No requirement, contract, or test contradicts a Project Principle. If a principle must be relaxed, an ADR records the trade-off.
+
+## Step 8c — Plan (executable task plan)
+
+Once the Readiness Gate passes, the implementing agent generates a **Plan** from the spec **before writing any code**. The Plan is the executable contract for the work the agent is about to do, expressed as a sequenced, parallelizable task list that the engineer reviews and approves.
+
+This step parallels native plan modes in popular AI coding agents:
+
+- **Cursor** — Plan mode produces a plan artifact from a prompt and selected context.
+- **Claude Code** — `/plan` workflow produces a structured plan in the chat or as a file artifact.
+- **spec-kit** — `/tasks` produces a numbered tasks artifact with parallel markers.
+
+Agent Disco does not require a specific platform; it requires that the Plan exist, be reviewed, and be approved before code is written.
+
+### Plan content requirements
+
+Each task in the Plan must:
+
+- **Reference a specific spec section** (Acceptance Criterion ID, Functional Requirement number, or Failure Mode Test row). Tasks without spec references are rejected — they are scope creep.
+- **Name the exact file path** it will create or edit. Vague references like "update the service" are rejected.
+- **Inherit the `[P]` parallel marker** from the spec's Test Boundary Map when the task is independent of other tasks. If the spec marks `AC-3` as `[P]`, the corresponding implementation task is `[P]` too.
+- **Declare an explicit dependency** on prior tasks when sequential. State the dependency (e.g., "after T-001 creates the workspace fixture").
+
+### Approval gate
+
+The engineer reviews the Plan against four checks. Failing any check returns the Plan to the agent for revision.
+
+| Check | Question | Failure mode if skipped |
+|-------|----------|-------------------------|
+| **Coverage** | Does every spec requirement have at least one task? | Silent gaps; failing tests with no implementation behind them. |
+| **Scope** | Does any task exceed what the spec authorizes? | Silent scope creep; features that "just slipped in" during implementation. |
+| **Sequencing** | Are dependencies between tasks explicit and correct? | Race conditions, partial-state failures, broken `[P]` claims. |
+| **Blast radius** | Does any task touch files outside the Codebase Context section? | Surprise changes in code the spec did not analyze; uncovered regressions. |
+
+### Plan storage
+
+Convention: `requirements/<FeatureName>/specs/SPEC-NNN/PLAN.md`. The Plan becomes part of the durable artifact set alongside the spec, ADRs, and audit entries. If your agent platform stores plans in a different location (e.g., `.cursor/plan/`), keep a copy at the convention path so the artifact set stays portable across agents.
+
+### Plan-time audit trigger
+
+The Plan stage is a high-yield moment for catching audit items before they become code. A `Wrong` or `Gap` discovered during Plan review is cheaper to fix than the same correction discovered during code review. Engineers should be especially watchful here for missing failure-mode tasks, missing rollback paths, and tasks that touch widely-imported modules without justification.
 
 ## Engineering Audit Loop
 
