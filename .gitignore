@@ -11,6 +11,11 @@ Thumbs.db
 *.swo
 *~
 
+# Cursor IDE — track only the project rule shims; ignore everything else
+# Cursor drops in (chat history, indexing caches, project-local settings).
+.cursor/*
+!.cursor/rules/
+
 # Node (for any future tooling)
 node_modules/
 npm-debug.log*

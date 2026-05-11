@@ -22,7 +22,7 @@ Agent Disco turns ambiguous feature ideas into specs your AI coding agent can sh
 2. Fill in the project context:
    - [`templates/product-context.md`](templates/product-context.md) — including the **Project Principles & Non-Negotiables** (your "constitution")
    - [`templates/product-features.md`](templates/product-features.md) — existing capability inventory
-3. Open your AI coding agent in the project root.
+3. Open your AI coding agent in the project root. **Claude Code** and **Cursor** both work out of the box; see [`## Activation`](#activation) below for details.
 4. Say: **"Load Disco. I want to scope a new feature."**
 
 ## Workflow
@@ -176,7 +176,18 @@ Two support personas are available on demand:
 - **Barry** — Senior Business Analyst (`Activate Barry`). Sharpens requirements, business rules, data model, and Component Reuse Audit.
 - **Simon** — Director of Engineering / Solution Architect (`Activate Simon`). Architecture, reliability, security, delivery trade-offs. Reuses a local industry-context file across sessions.
 
-Full persona definitions live in [`activation/claude-code/`](activation/claude-code/).
+Full persona definitions live in [`activation/claude-code/`](activation/claude-code/) and [`activation/cursor/`](activation/cursor/) (kept byte-equivalent until the personas move to a platform-neutral folder).
+
+## Activation
+
+Agent Disco ships first-class activation for two AI coding agents. The trigger phrases (`Load Disco`, `Activate Barry`, `Activate Simon`) are identical on both platforms — only the discovery mechanism differs.
+
+| Platform | Discovery mechanism | Activation files |
+|----------|---------------------|------------------|
+| **Claude Code** | Reads `activation/claude-code/load-disco.md` directly when the user runs the activation prompt. | [`activation/claude-code/`](activation/claude-code/) |
+| **Cursor** | Cursor's agent loads a [project rule](https://docs.cursor.com/context/rules) from [`.cursor/rules/`](.cursor/rules/) whose description matches the user's phrasing; the rule body redirects to the full activation file under `activation/cursor/`. | [`.cursor/rules/`](.cursor/rules/) (shims) + [`activation/cursor/`](activation/cursor/) (full activation logic) |
+
+Both paths converge on the same `SKILL.md` and the same templates. Simon's industry-context file (`.claude/context/industry-context.md`) is shared across platforms so domain context stays unified across tools.
 
 ## Optional Integrations
 
@@ -203,11 +214,19 @@ Full persona definitions live in [`activation/claude-code/`](activation/claude-c
 | `dashboard/theme/dark_indigo/DESIGN.md` | Dark Indigo — dark data theme, full token reference + Chart.js guide + complete skeleton |
 | `examples/inline-document-comments/` | Worked example: discovery dashboard for a hypothetical Acme Docs feature (Coral Pulse theme) |
 | `activation/claude-code/load-disco.md` | Claude Code activation entrypoint (loads Disco only) |
-| `activation/claude-code/activate-barry.md` | On-demand Barry activation |
-| `activation/claude-code/barry-persona.md` | Full Barry persona definition |
-| `activation/claude-code/activate-simon.md` | On-demand Simon activation |
-| `activation/claude-code/simon-persona.md` | Full Simon persona definition |
-| `.claude/context/industry-context.md` | Persistent local industry-context file Simon reads/updates across sessions |
+| `activation/claude-code/activate-barry.md` | On-demand Barry activation (Claude Code) |
+| `activation/claude-code/barry-persona.md` | Full Barry persona definition (Claude Code copy) |
+| `activation/claude-code/activate-simon.md` | On-demand Simon activation (Claude Code) |
+| `activation/claude-code/simon-persona.md` | Full Simon persona definition (Claude Code copy) |
+| `activation/cursor/load-disco.md` | Cursor activation entrypoint (loads Disco only) |
+| `activation/cursor/activate-barry.md` | On-demand Barry activation (Cursor) |
+| `activation/cursor/barry-persona.md` | Full Barry persona definition (Cursor copy, byte-equivalent to Claude Code) |
+| `activation/cursor/activate-simon.md` | On-demand Simon activation (Cursor) |
+| `activation/cursor/simon-persona.md` | Full Simon persona definition (Cursor copy, byte-equivalent to Claude Code) |
+| `.cursor/rules/load-disco.mdc` | Cursor project-rule shim that triggers Disco activation on Disco-related phrasings |
+| `.cursor/rules/activate-barry.mdc` | Cursor project-rule shim that triggers Barry activation |
+| `.cursor/rules/activate-simon.mdc` | Cursor project-rule shim that triggers Simon activation |
+| `.claude/context/industry-context.md` | Persistent local industry-context file Simon reads/updates across sessions (shared across Claude Code and Cursor) |
 | `docs/integrations/graphify.md` | Graphify integration guide |
 | `logo/agent-disco.svg` | Project logo, white wordmark for dark themes (primary) |
 | `logo/agent-disco-light.svg` | Project logo, black wordmark for light themes (primary) |

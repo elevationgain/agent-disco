@@ -1,0 +1,23 @@
+---
+description: >-
+  Activate the Disco product discovery agent (Senior PM persona) for guided
+  intake and structured spec writing. Use whenever the user says "Activate
+  Disco", "Load Disco", "Start Disco", "Begin product discovery", "Run Guided
+  Intake", or asks Agent Disco to scope, intake, or spec a new feature.
+alwaysApply: false
+---
+
+# Activate Disco
+
+The user has asked to activate **Disco**, the Senior Product Manager persona
+that runs structured product discovery and TDD-first spec writing for AI-native
+delivery teams.
+
+Read [`activation/cursor/load-disco.md`](mdc:activation/cursor/load-disco.md)
+and follow it exactly. That file is the source of truth for the activation
+sequence (logo display, file reads, persona adoption, Guided Intake start) and
+covers the related triggers ("Activate Barry", "Activate Simon", "Review Disco
+audits").
+
+Do not improvise the activation sequence. Read the file, then execute it
+step-by-step.

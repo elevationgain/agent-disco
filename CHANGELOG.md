@@ -12,7 +12,61 @@ open a new empty `[Unreleased]` section above it.
 
 ## [Unreleased]
 
-_No unreleased changes._
+### Added
+
+- **Cursor as a peer activation target alongside Claude Code.** Agent Disco
+  now activates first-class on both platforms with identical trigger phrases
+  (`Load Disco`, `Activate Barry`, `Activate Simon`). Only the discovery
+  mechanism differs — Claude Code reads the activation file directly, while
+  Cursor's agent discovers a project rule first.
+  - `activation/cursor/load-disco.md` — Cursor activation entrypoint that
+    loads Disco only. Mirrors `activation/claude-code/load-disco.md` step
+    for step (logo display, file reads, persona adoption, Guided Intake
+    start) so the user-visible experience is identical.
+  - `activation/cursor/activate-barry.md` and
+    `activation/cursor/activate-simon.md` — Cursor mirrors of the on-demand
+    support persona activations.
+  - `activation/cursor/barry-persona.md` and
+    `activation/cursor/simon-persona.md` — full persona definitions,
+    byte-equivalent to their `activation/claude-code/` counterparts. Both
+    files carry an explicit "keep in sync" header until the personas move
+    to a platform-neutral folder.
+  - `.cursor/rules/load-disco.mdc`, `.cursor/rules/activate-barry.mdc`,
+    `.cursor/rules/activate-simon.mdc` — three thin Cursor project-rule
+    shims (`alwaysApply: false`) whose descriptions trigger on Disco
+    phrasing and whose bodies redirect to the matching `activation/cursor/`
+    file via `mdc:` workspace links. Keeps the heavy activation logic in
+    plain Markdown while still giving Cursor's agent a discoverable hook.
+  - `.claude/context/industry-context.md` is read/written by **both**
+    platforms' Simon persona, so domain context stays unified across tools
+    instead of fragmenting into `.claude/` and `.cursor/` copies.
+- **`## Activation` section in `README.md`** — new section after `## Personas`
+  with a per-platform table covering discovery mechanism (direct read vs.
+  Cursor project rule), activation file paths, and the shared
+  industry-context convention. `## Quick Start` updated to call out both
+  platforms with a link to the new section.
+- **`README.md` Repository Layout extended** with rows for the five new
+  `activation/cursor/*.md` files and the three `.cursor/rules/*.mdc`
+  shims; existing `activation/claude-code/*` rows reworded to mark them as
+  the Claude Code copies; `.claude/context/industry-context.md` row
+  reworded to note it's shared across platforms.
+
+### Changed
+
+- **`.gitignore` scopes `.cursor/`** to track only the project-rule shims
+  (`.cursor/rules/`) and ignore everything else Cursor IDE drops in (chat
+  history, indexing caches, project-local settings, the auto-created
+  `.cursor/context/` folder). Pattern: `.cursor/*` + `!.cursor/rules/`.
+
+### Notes
+
+- Persona files (`barry-persona.md`, `simon-persona.md`) are duplicated
+  under `activation/claude-code/` and `activation/cursor/`. The duplication
+  is deliberate for now — each platform folder stays self-contained for
+  discoverability. Future work: refactor to `activation/personas/` shared
+  folder and have both platform activations reference it. Tracked as a TODO
+  in the `## Notes for Cursor` block of `activation/cursor/load-disco.md`
+  and the equivalent headers of the Cursor persona files.
 
 ## [0.2.0] - 2026-05-11
 
