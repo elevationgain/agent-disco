@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Product Name — Product Discovery Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface-alt: #232734;
+  --border: #2d3348;
+  --text: #e4e6ef;
+  --text-muted: #8b8fa8;
+  --accent: #6366f1;
+  --accent-light: #818cf8;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --green: #22c55e;
+  --cyan: #06b6d4;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+h1,h2,h3,h4,h5,h6 { font-family: 'Plus Jakarta Sans', sans-serif; }
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+.section { scroll-margin-top: 100px; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0; width: 256px; z-index: 50;
+  background: var(--surface); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 1.25rem 1rem;
+  overflow: hidden; transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#sidebar.collapsed { width: 64px; }
+
+#sidebar .nav-label,
+#sidebar .section-header-text,
+#sidebar .sidebar-title,
+#sidebar .sidebar-subtitle,
+#sidebar .sidebar-footer-text,
+#sidebar .specs-placeholder {
+  transition: opacity 0.2s ease; white-space: nowrap;
+}
+#sidebar.collapsed .nav-label,
+#sidebar.collapsed .section-header-text,
+#sidebar.collapsed .sidebar-title,
+#sidebar.collapsed .sidebar-subtitle,
+#sidebar.collapsed .sidebar-footer-text,
+#sidebar.collapsed .specs-placeholder {
+  opacity: 0; width: 0; overflow: hidden;
+}
+#sidebar.collapsed .nav-item { justify-content: center; padding-left: 0; padding-right: 0; gap: 0; }
+#sidebar.collapsed .sidebar-header { justify-content: center; gap: 0; }
+#sidebar.collapsed h3 { justify-content: center; gap: 0; padding-left: 0; padding-right: 0; }
+
+.sidebar-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.5rem; padding: 0 .25rem; }
+.sidebar-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0;
+}
+.sidebar-title { font-size: .875rem; font-weight: 700; color: var(--accent-light); line-height: 1.3; }
+.sidebar-subtitle { font-size: .625rem; text-transform: uppercase; letter-spacing: .12em; color: var(--text-muted); font-weight: 600; }
+
+.sidebar-section-label {
+  padding: 0 .5rem; margin-bottom: .5rem;
+  font-size: .625rem; font-weight: 900; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--text-muted);
+  display: flex; align-items: center; gap: .5rem;
+}
+.sidebar-nav { display: flex; flex-direction: column; gap: 2px; margin-bottom: 1.25rem; }
+.nav-item {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .5rem .5rem; border-radius: 8px;
+  text-decoration: none; color: var(--text-muted);
+  transition: all 0.15s ease; font-size: .875rem;
+}
+.nav-item:hover { background: var(--surface-alt); color: var(--text); }
+.nav-item.active { background: var(--surface-alt); color: var(--accent-light); font-weight: 700; }
+
+.status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.dot-red { background: var(--red); box-shadow: 0 0 8px rgba(239,68,68,0.35); }
+.dot-amber { background: var(--amber); box-shadow: 0 0 8px rgba(245,158,11,0.35); }
+.dot-green { background: var(--green); box-shadow: 0 0 8px rgba(34,197,94,0.35); }
+
+.sidebar-footer {
+  margin-top: auto; padding-top: .75rem; border-top: 1px solid var(--border);
+}
+.sidebar-footer-text { font-size: .6875rem; color: var(--text-muted); margin-bottom: .75rem; padding: 0 .25rem; }
+#collapse-toggle {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .5rem; border-radius: 8px; border: none; background: transparent;
+  color: var(--text-muted); cursor: pointer; transition: all 0.15s ease;
+  font-family: inherit; font-size: .75rem; font-weight: 600;
+}
+#collapse-toggle:hover { background: var(--surface-alt); color: var(--text); }
+
+/* ── MAIN ── */
+#main-content {
+  margin-left: 256px; min-height: 100vh; padding: 2.5rem;
+  transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#main-content.sidebar-collapsed { margin-left: 64px; }
+.content-max { max-width: 1100px; }
+
+/* ── STATUS BADGES ── */
+.badge {
+  display: inline-block; padding: .15rem .55rem; border-radius: 6px;
+  font-size: .7rem; font-weight: 600; letter-spacing: .02em;
+}
+.badge-red { background: rgba(239,68,68,.15); color: var(--red); }
+.badge-amber { background: rgba(245,158,11,.15); color: var(--amber); }
+.badge-green { background: rgba(34,197,94,.15); color: var(--green); }
+.badge-cyan { background: rgba(6,182,212,.15); color: var(--cyan); }
+.badge-muted { background: rgba(139,143,168,.15); color: var(--text-muted); }
+.badge-accent { background: rgba(99,102,241,.15); color: var(--accent-light); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem;
+}
+.card:hover { border-color: rgba(99,102,241,.3); }
+.card h4 { font-size: .95rem; font-weight: 700; margin-bottom: .35rem; }
+.card p { font-size: .875rem; color: var(--text-muted); line-height: 1.6; }
+
+/* ── STAT CARDS ── */
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.15rem 1.25rem;
+}
+.stat-card .label {
+  font-size: .75rem; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .04em; margin-bottom: .35rem;
+}
+.stat-card .value { font-size: 1.8rem; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; }
+.stat-card .detail { font-size: .8rem; color: var(--text-muted); margin-top: .2rem; }
+
+/* ── HERO ── */
+.hero-card {
+  background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+  border: none; border-radius: 16px; padding: 2.5rem;
+  position: relative; overflow: hidden;
+}
+.hero-card::before {
+  content: ''; position: absolute; top: -40px; right: -40px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+}
+.hero-card::after {
+  content: ''; position: absolute; bottom: -60px; left: 30%;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+}
+.hero-card h1 { font-size: 2.75rem; font-weight: 800; color: #fff; position: relative; z-index: 1; }
+.hero-card .hero-tagline { font-size: 1.15rem; color: rgba(255,255,255,0.7); margin-top: .5rem; font-style: italic; position: relative; z-index: 1; }
+.hero-card .hero-desc { font-size: .95rem; color: rgba(255,255,255,0.55); margin-top: .75rem; max-width: 600px; line-height: 1.6; position: relative; z-index: 1; }
+.hero-badges { display: flex; gap: .5rem; margin-bottom: 1rem; position: relative; z-index: 1; }
+.hero-badge {
+  padding: .25rem .75rem; border-radius: 9999px;
+  font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+}
+
+/* ── SECTION HEADERS ── */
+.section-header {
+  margin: 2.5rem 0 1.25rem; padding-bottom: .5rem;
+  border-bottom: 1px solid var(--border);
+}
+.section-header h2 { font-size: 1.3rem; font-weight: 700; }
+.section-header .note { font-size: .85rem; color: var(--text-muted); margin-top: .25rem; }
+
+/* ── CALLOUTS ── */
+.callout {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0;
+  padding: 1.25rem 1.5rem; margin-bottom: 2rem;
+  font-size: .9rem; line-height: 1.65; color: var(--text-muted);
+}
+.callout strong { color: var(--text); }
+.callout.danger { border-left-color: var(--red); }
+.callout.success { border-left-color: var(--green); }
+.callout h3 { color: var(--text); font-size: .95rem; margin-bottom: .5rem; }
+.callout ul { margin: .5rem 0 0; padding-left: 1.25rem; }
+.callout li { margin-bottom: .35rem; }
+
+/* ── OQ CARDS ── */
+.oq-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem; transition: border-color 0.15s ease;
+}
+.oq-card:hover { border-color: rgba(99,102,241,.3); }
+.oq-card .oq-id { font-size: .7rem; font-weight: 900; letter-spacing: .1em; color: var(--text-muted); text-transform: uppercase; }
+.oq-card h4 { font-size: .95rem; font-weight: 700; color: var(--text); margin: .5rem 0 .35rem; }
+.oq-card p { font-size: .85rem; color: var(--text-muted); line-height: 1.55; margin-bottom: .75rem; }
+.oq-leaning {
+  background: var(--surface-alt); padding: .75rem 1rem; border-radius: 8px;
+}
+.oq-leaning .leaning-label { font-size: .625rem; font-weight: 700; color: var(--accent-light); text-transform: uppercase; letter-spacing: .06em; margin-bottom: .25rem; }
+.oq-leaning p { font-size: .85rem; color: var(--text-muted); font-style: italic; margin: 0; }
+
+/* ── DECISION LIST ── */
+.decision-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem; display: flex; align-items: center; gap: 1.25rem;
+}
+.decision-item:hover { border-color: rgba(99,102,241,.3); }
+.decision-rank { font-size: 1.5rem; font-weight: 900; color: rgba(99,102,241,.2); width: 2rem; text-align: center; flex-shrink: 0; }
+.decision-body { border-left: 4px solid var(--accent); padding-left: 1rem; flex: 1; }
+.decision-body .oq-id { font-size: .625rem; font-weight: 700; color: var(--accent-light); text-transform: uppercase; letter-spacing: .08em; }
+.decision-body h5 { font-size: .9rem; font-weight: 700; color: var(--text); }
+.decision-body p { font-size: .75rem; color: var(--text-muted); margin-top: .15rem; }
+
+/* ── CROSS-REF CARDS ── */
+.xref-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem;
+}
+.xref-card:hover { border-color: rgba(99,102,241,.3); }
+.xref-chain { font-weight: 700; font-size: .85rem; color: var(--accent-light); }
+
+/* ── DISCOVERY AREA CARDS ── */
+.area-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem;
+}
+.area-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .5rem; }
+.area-card p { font-size: .875rem; color: var(--text-muted); line-height: 1.6; margin-bottom: .75rem; }
+.area-tag {
+  display: inline-block; padding: .35rem .75rem;
+  background: var(--surface-alt); color: var(--text-muted);
+  border-radius: 8px; font-size: .75rem; font-weight: 600;
+}
+
+/* ── PERSONA CARDS ── */
+.persona-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.5rem;
+}
+.persona-card:hover { border-color: rgba(99,102,241,.3); }
+.persona-header { display: flex; align-items: center; gap: .75rem; margin-bottom: .75rem; }
+.persona-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; flex-shrink: 0;
+}
+.persona-name { font-size: 1rem; font-weight: 700; }
+.persona-role { font-size: .75rem; color: var(--text-muted); }
+
+/* ── GRIDS ── */
+.grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+@media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ── SEPARATOR ── */
+.sep { display: flex; align-items: center; gap: .75rem; margin: 2rem 0 1.25rem; }
+.sep-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; padding: .2rem .6rem; border-radius: 9999px; white-space: nowrap; }
+.sep-line { height: 1px; flex: 1; background: var(--border); }
+
+/* ── FOOTER ── */
+.dashboard-footer {
+  border-top: 1px solid var(--border); padding-top: 2rem; margin-top: 3rem;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: .75rem; color: var(--text-muted);
+}
+</style>
+</head>
+<body>
+
+<!-- ========== SIDEBAR ========== -->
+<aside id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-icon">
+      <span class="material-symbols-outlined" style="font-size:20px;">auto_awesome</span>
+    </div>
+    <div style="overflow:hidden;">
+      <div class="sidebar-title" style="white-space:nowrap;">Product Name</div>
+      <div class="sidebar-subtitle">Product Discovery</div>
+    </div>
+  </div>
+
+  <div style="flex:1; overflow-y:auto;">
+
+    <!-- Discovery -->
+    <h3 class="sidebar-section-label">
+      <span class="material-symbols-outlined" style="font-size:14px;">search</span>
+      <span class="section-header-text">Discovery</span>
+    </h3>
+    <nav class="sidebar-nav">
+      <a data-nav="personas" href="#personas" title="User Personas" class="nav-item">
+        <span class="status-dot dot-green"></span>
+        <span class="nav-label">User Personas</span>
+      </a>
+      <a data-nav="core-flow" href="#core-flow" title="Core Flow" class="nav-item">
+        <span class="status-dot dot-amber"></span>
+        <span class="nav-label">Core Flow</span>
+      </a>
+      <a data-nav="area-a" href="#area-a" title="Discovery Area A" class="nav-item">
+        <span class="status-dot dot-red"></span>
+        <span class="nav-label">Discovery Area A</span>
+      </a>
+      <a data-nav="area-b" href="#area-b" title="Discovery Area B" class="nav-item">
+        <span class="status-dot dot-red"></span>
+        <span class="nav-label">Discovery Area B</span>
+      </a>
+    </nav>
+
+    <!-- Sections -->
+    <h3 class="sidebar-section-label">
+      <span class="material-symbols-outlined" style="font-size:14px;">dashboard</span>
+      <span class="section-header-text">Sections</span>
+    </h3>
+    <nav class="sidebar-nav">
+      <a data-nav="overview" href="#overview" title="Overview" class="nav-item">
+        <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">monitoring</span>
+        <span class="nav-label">Overview</span>
+      </a>
+      <a data-nav="open-questions" href="#open-questions" title="Open Questions" class="nav-item">
+        <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">help</span>
+        <span class="nav-label">Open Questions</span>
+      </a>
+      <a data-nav="cross-refs" href="#cross-refs" title="Cross-References" class="nav-item">
+        <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">link</span>
+        <span class="nav-label">Cross-References</span>
+      </a>
+      <a data-nav="decisions" href="#decisions" title="Decisions" class="nav-item">
+        <span class="material-symbols-outlined" style="font-size:18px; color:var(--text-muted);">gavel</span>
+        <span class="nav-label">Decisions</span>
+      </a>
+    </nav>
+
+    <!-- Specs -->
+    <h3 class="sidebar-section-label">
+      <span class="material-symbols-outlined" style="font-size:14px;">description</span>
+      <span class="section-header-text">Specs</span>
+    </h3>
+    <nav class="sidebar-nav">
+      <a href="#" title="No specs yet" class="nav-item">
+        <span class="material-symbols-outlined" style="font-size:18px; color:rgba(139,143,168,.4);">assignment</span>
+        <span class="nav-label specs-placeholder" style="color:var(--text-muted); opacity:.5; font-style:italic;">None yet</span>
+      </a>
+    </nav>
+  </div>
+
+  <div class="sidebar-footer">
+    <p class="sidebar-footer-text">Updated YYYY-MM-DD</p>
+    <button id="collapse-toggle" onclick="toggleSidebar()">
+      <span class="material-symbols-outlined" style="font-size:18px;" id="collapse-icon">chevron_left</span>
+      <span class="nav-label" style="font-size:.75rem;">Collapse</span>
+    </button>
+  </div>
+</aside>
+
+<!-- ========== MAIN CONTENT ========== -->
+<main id="main-content">
+<div class="content-max">
+
+  <!-- ===== OVERVIEW / HERO ===== -->
+  <section id="overview" class="section" style="margin-bottom:3rem;">
+    <div class="hero-badges">
+      <span class="hero-badge" style="background:rgba(239,68,68,.15); color:var(--red);">Discovery Open</span>
+      <span class="hero-badge badge-muted">YYYY-MM-DD</span>
+    </div>
+
+    <div class="hero-card" style="margin-bottom:1.5rem;">
+      <h1>Product Name</h1>
+      <p class="hero-tagline">One-line tagline describing what this product does</p>
+      <p class="hero-desc">2&ndash;3 sentence vision statement. What problem does this solve? Who has this problem today? What does this product replace or improve?</p>
+    </div>
+
+    <!-- Metric Cards -->
+    <!-- MATH: N total OQs = breakdown by prefix -->
+    <!-- MATH: Discovery areas: X Open + Y Direction Set + Z Resolved = total -->
+    <div class="grid-3" style="margin-bottom:1.5rem;">
+      <div class="stat-card">
+        <div class="label">Open Questions</div>
+        <div class="value" style="color:var(--accent-light);">N</div>
+        <div class="detail">X critical &middot; Y direction set</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Discovery Areas</div>
+        <div class="value" style="color:var(--amber);">N</div>
+        <div class="detail">X open &middot; Y resolved</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Pending Decisions</div>
+        <div class="value" style="color:var(--red);">N</div>
+        <div class="detail">X blocking &middot; Y high &middot; Z low</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <h3>Summary</h3>
+      <p>A concise narrative overview of where this discovery stands. What's been learned so far, what the biggest unknowns are, and what must happen next before this can move to specs.</p>
+    </div>
+  </section>
+
+  <!-- ===== PERSONAS ===== -->
+  <section id="personas" class="section" style="margin-bottom:3rem;">
+    <div class="section-header">
+      <h2>User Personas</h2>
+      <div class="note">Who are we building for?</div>
+    </div>
+
+    <div class="grid-2" style="margin-top:1.25rem;">
+      <div class="persona-card">
+        <div class="persona-header">
+          <div class="persona-icon" style="background:rgba(99,102,241,.15); color:var(--accent-light);">
+            <span class="material-symbols-outlined">person</span>
+          </div>
+          <div>
+            <div class="persona-name">Persona A</div>
+            <div class="persona-role">Role / context</div>
+          </div>
+          <span class="badge badge-green" style="margin-left:auto;">Validated</span>
+        </div>
+        <p style="font-size:.85rem; color:var(--text-muted); line-height:1.55;">Description of this persona&rsquo;s goals, pain points, and relationship to the product. What do they need? What frustrates them today?</p>
+      </div>
+
+      <div class="persona-card">
+        <div class="persona-header">
+          <div class="persona-icon" style="background:rgba(245,158,11,.15); color:var(--amber);">
+            <span class="material-symbols-outlined">person</span>
+          </div>
+          <div>
+            <div class="persona-name">Persona B</div>
+            <div class="persona-role">Role / context</div>
+          </div>
+          <span class="badge badge-amber" style="margin-left:auto;">In Progress</span>
+        </div>
+        <p style="font-size:.85rem; color:var(--text-muted); line-height:1.55;">Description of this persona&rsquo;s goals, pain points, and relationship to the product. What do they need? What frustrates them today?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CORE FLOW ===== -->
+  <section id="core-flow" class="section" style="margin-bottom:3rem;">
+    <div class="section-header">
+      <h2>Core Flow</h2>
+      <div class="note">The primary user journey through the product</div>
+    </div>
+
+    <div style="display:flex; gap:1rem; margin-top:1.25rem; overflow-x:auto; padding-bottom:.5rem;">
+      <div class="card" style="min-width:200px; flex:1; border-top:3px solid var(--accent);">
+        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem;">
+          <span style="width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:800;">1</span>
+          <h4 style="margin:0;">Step Name</h4>
+        </div>
+        <p>What the user does at this step and why it matters.</p>
+      </div>
+      <div class="card" style="min-width:200px; flex:1; border-top:3px solid var(--accent-light);">
+        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem;">
+          <span style="width:28px; height:28px; border-radius:50%; background:var(--accent-light); color:#fff; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:800;">2</span>
+          <h4 style="margin:0;">Step Name</h4>
+        </div>
+        <p>What the user does at this step and why it matters.</p>
+      </div>
+      <div class="card" style="min-width:200px; flex:1; border-top:3px solid var(--cyan);">
+        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem;">
+          <span style="width:28px; height:28px; border-radius:50%; background:var(--cyan); color:#fff; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:800;">3</span>
+          <h4 style="margin:0;">Step Name</h4>
+        </div>
+        <p>What the user does at this step and why it matters.</p>
+      </div>
+      <div class="card" style="min-width:200px; flex:1; border-top:3px solid var(--green);">
+        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.75rem;">
+          <span style="width:28px; height:28px; border-radius:50%; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:.8rem; font-weight:800;">4</span>
+          <h4 style="margin:0;">Step Name</h4>
+        </div>
+        <p>What the user does at this step and why it matters.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DISCOVERY AREAS ===== -->
+  <section id="area-a" class="section" style="margin-bottom:3rem;">
+    <div class="section-header">
+      <h2>Discovery Area A</h2>
+      <div class="note">Status: <span style="color:var(--red);">Open</span></div>
+    </div>
+    <div class="area-card" style="margin-top:1.25rem;">
+      <h3>Area Title</h3>
+      <p>Summary of what this discovery area covers, the key tensions, and what must be resolved before specs can begin.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:.5rem;">
+        <span class="area-tag">Key constraint or direction</span>
+        <span class="area-tag">Another constraint</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="area-b" class="section" style="margin-bottom:3rem;">
+    <div class="section-header">
+      <h2>Discovery Area B</h2>
+      <div class="note">Status: <span style="color:var(--red);">Open</span></div>
+    </div>
+    <div class="area-card" style="margin-top:1.25rem;">
+      <h3>Area Title</h3>
+      <p>Summary of what this discovery area covers, the key tensions, and what must be resolved before specs can begin.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:.5rem;">
+        <span class="area-tag">Key constraint or direction</span>
+        <span class="area-tag">Another constraint</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== OPEN QUESTIONS ===== -->
+  <section id="open-questions" class="section" style="margin-bottom:3rem;">
+    <div class="section-header">
+      <h2>Priority Open Questions</h2>
+      <div class="note">Ordered by blocking impact</div>
+    </div>
+
+    <!-- Critical -->
+    <div class="sep">
+      <span class="sep-label" style="background:rgba(239,68,68,.15); color:var(--red);">Critical &mdash; Blocking</span>
+      <span class="sep-line"></span>
+    </div>
+    <div class="grid-2">
+      <div class="oq-card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <span class="oq-id">PREFIX-01</span>
+          <span class="status-dot dot-red" style="width:8px; height:8px;"></span>
+        </div>
+        <h4>Open question title</h4>
+        <p>Why this question matters and what it blocks.</p>
+        <div class="oq-leaning">
+          <div class="leaning-label">Leaning</div>
+          <p>Current instinct and reasoning, even if tentative.</p>
+        </div>
+      </div>
+
+      <div class="oq-card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <span class="oq-id">PREFIX-02</span>
+          <span class="status-dot dot-red" style="width:8px; height:8px;"></span>
+        </div>
+        <h4>Open question title</h4>
+        <p>Why this question matters and what it blocks.</p>
+        <div class="oq-leaning">
+          <div class="leaning-label">Leaning</div>
+          <p>Current instinct and reasoning, even if tentative.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Direction Set -->
+    <div class="sep">
+      <span class="sep-label" style="background:rgba(245,158,11,.15); color:var(--amber);">Direction Set &mdash; Needs Confirmation</span>
+      <span class="sep-line"></span>
+    </div>
+    <div class="grid-3">
+      <div class="oq-card">
+        <span class="oq-id">PREFIX-03</span>
+        <h4>Direction-set question title</h4>
+        <p style="font-style:italic;">Leaning: Current direction with brief reasoning.</p>
+      </div>
+      <div class="oq-card">
+        <span class="oq-id">PREFIX-04</span>
+        <h4>Direction-set question title</h4>
+        <p style="font-style:italic;">Leaning: Current direction with brief reasoning.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CROSS-REFERENCES ===== -->
+  <section id="cross-refs" class="section" style="margin-bottom:3rem;">
+    <div class="section-header">
+      <h2>Key Cross-References</h2>
+      <div class="note">OQ chains that are tightly coupled &mdash; resolving one changes the landscape for the others</div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:.75rem; margin-top:1.25rem;">
+      <div class="xref-card">
+        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem;">
+          <span class="material-symbols-outlined" style="font-size:18px; color:var(--accent-light);">link</span>
+          <span class="xref-chain">AA-01 &harr; CF-02 &harr; BB-03</span>
+        </div>
+        <p style="font-size:.85rem; color:var(--text-muted); line-height:1.55;">Explain why resolving one of these changes the landscape for the others. Name the dependency chain.</p>
+      </div>
+
+      <div class="xref-card">
+        <div style="display:flex; align-items:center; gap:.5rem; margin-bottom:.5rem;">
+          <span class="material-symbols-outlined" style="font-size:18px; color:var(--accent-light);">link</span>
+          <span class="xref-chain">PER-01 &harr; AA-02</span>
+        </div>
+        <p style="font-size:.85rem; color:var(--text-muted); line-height:1.55;">Explain why resolving one of these changes the landscape for the others. Name the dependency chain.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DECISIONS ===== -->
+  <section id="decisions" class="section" style="margin-bottom:3rem;">
+    <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-end;">
+      <div>
+        <h2>Pending Decisions</h2>
+        <div class="note">Ordered by blocking impact &mdash; must be resolved to move from discovery to specs</div>
+      </div>
+      <span class="badge-accent badge" style="font-size:.65rem;">N PENDING &middot; N ACCEPTED</span>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:.75rem; margin-top:1.25rem;">
+      <div class="decision-item">
+        <span class="decision-rank">1</span>
+        <div class="decision-body">
+          <span class="oq-id" style="color:var(--accent-light);">PREFIX-01</span>
+          <h5>Decision title</h5>
+          <p>What this blocks</p>
+        </div>
+        <span class="badge badge-red">BLOCKING</span>
+      </div>
+
+      <div class="decision-item">
+        <span class="decision-rank">2</span>
+        <div class="decision-body" style="border-left-color:var(--accent-light);">
+          <span class="oq-id" style="color:var(--accent-light);">PREFIX-02</span>
+          <h5>Decision title</h5>
+          <p>What this blocks</p>
+        </div>
+        <span class="badge badge-muted">HIGH</span>
+      </div>
+
+      <div class="decision-item">
+        <span class="decision-rank">3</span>
+        <div class="decision-body" style="border-left-color:var(--border);">
+          <span class="oq-id">PREFIX-03</span>
+          <h5>Decision title</h5>
+          <p>Can be deferred but needs directional decision</p>
+        </div>
+        <span class="badge badge-muted">LOW</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="dashboard-footer">
+    <p>Product Name &middot; Product Discovery</p>
+    <p>N discovery files &middot; N open questions &middot; N decisions &middot; N specs</p>
+  </footer>
+
+</div>
+</main>
+
+<!-- ========== SIDEBAR TOGGLE ========== -->
+<script>
+const sidebar = document.getElementById('sidebar');
+const mainContent = document.getElementById('main-content');
+const collapseIcon = document.getElementById('collapse-icon');
+
+function toggleSidebar() {
+  const isCollapsed = sidebar.classList.toggle('collapsed');
+  mainContent.classList.toggle('sidebar-collapsed', isCollapsed);
+  collapseIcon.textContent = isCollapsed ? 'chevron_right' : 'chevron_left';
+  localStorage.setItem('sidebar-collapsed', isCollapsed ? '1' : '0');
+}
+
+(function restoreSidebarState() {
+  if (localStorage.getItem('sidebar-collapsed') === '1') {
+    sidebar.classList.add('collapsed');
+    mainContent.classList.add('sidebar-collapsed');
+    collapseIcon.textContent = 'chevron_right';
+  }
+})();
+</script>
+
+<!-- ========== SCROLL SPY ========== -->
+<script>
+const sections = document.querySelectorAll('.section');
+const navItems = document.querySelectorAll('[data-nav]');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navItems.forEach(item => item.classList.remove('active'));
+      const activeNav = document.querySelector(`[data-nav="${entry.target.id}"]`);
+      if (activeNav) activeNav.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

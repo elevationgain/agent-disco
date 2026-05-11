@@ -150,7 +150,7 @@ Output goes under `requirements/<FeatureName>/` (or a path the user specifies):
 ```
 requirements/<FeatureName>/
 ├── README.md                    ← Vision, glossary, status, OQ index
-├── dashboard.html               ← Visual dashboard (optional, see templates/dashboard-guide.md)
+├── dashboard.html               ← Visual dashboard (optional, see templates/dashboard-guide.md for content; dashboard/ for bundled themes)
 ├── discovery/
 │   ├── 00-personas.md           ← User archetypes
 │   ├── 01-<core-flow>.md        ← Primary user flow
@@ -210,7 +210,8 @@ The detailed artifact templates live alongside this skill. Read them on demand:
 - `templates/spec-template.md` — full implementation-ready spec
 - `templates/adr-template.md` — single decision record
 - `templates/audit-template.md` — audit entry + `audit/README.md`
-- `templates/dashboard-guide.md` — generic single-file dashboard pattern
+- `templates/dashboard-guide.md` — what a discovery dashboard contains and when to update it
+- `dashboard/SKILL.md` — bundled dashboard build skill (Coral Pulse + Dark Indigo themes, reference HTML, design tokens)
 - `templates/product-context.md` — product/domain grounding
 - `templates/product-features.md` — capability inventory
 

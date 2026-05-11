@@ -9,6 +9,12 @@ The dashboard is **optional but recommended**. It is not a build artifact; it is
 a single `.html` file that opens directly in any browser. No build step, no
 server, no proprietary format.
 
+This guide describes **what** a discovery dashboard contains and when to update
+it. For **how** to build a polished one, use the bundled dashboard skill at
+[`dashboard/`](../dashboard/) — it ships two themes (Coral Pulse for editorial
+discovery dashboards, Dark Indigo for data dashboards), a reference HTML
+skeleton, design tokens, and accumulated best practices.
+
 ## When the Dashboard Gets Created
 
 The dashboard is created during the **SCAFFOLD** step (Process Flow step 2),
@@ -68,8 +74,15 @@ shows icons only. Persist the collapsed state via `localStorage`.
 
 ## Theming
 
-The skill is theme-agnostic. Adopters choose their own visual style. A few
-guidelines:
+This guide is content-focused; it does not prescribe a visual style. The bundled
+dashboard skill at [`dashboard/`](../dashboard/) ships two ready-to-use themes:
+
+- **Coral Pulse** — light, editorial, recommended for discovery dashboards
+  (personas, open questions, decisions). See `dashboard/theme/coral_pulse/DESIGN.md`.
+- **Dark Indigo** — dark, data-focused, recommended for metrics dashboards or
+  Audit pattern reports. See `dashboard/theme/dark_indigo/DESIGN.md`.
+
+If you bring your own theme, follow these principles:
 
 - Choose a single theme per project and stick with it.
 - Use accessible contrast ratios (light or dark theme is fine).

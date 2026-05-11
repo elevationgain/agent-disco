@@ -135,6 +135,28 @@ Per-feature lessons live in `requirements/<FeatureName>/audit/README.md`. Saying
 
 A typical Agent Disco spec with all maps populated fits in roughly 15–30k tokens — an order of magnitude less than full-repo retrieval would burn for the same task — because the maps are *interpretations* of the codebase, not the codebase itself.
 
+## Dashboard
+
+*A single HTML file your stakeholders will actually read.*
+
+The markdown artifacts under `requirements/<FeatureName>/` are exhaustive — they're built for engineers, AI agents, and PMs in the weeds. They are not built for the executive who has 30 seconds before their next meeting. The optional `dashboard.html` solves this: a single self-contained file that opens in any browser and surfaces hero metrics, persona cards, open-question status, decisions, and risk callouts in a visual layout designed to be scanned, not read.
+
+**Why a dashboard beats markdown for stakeholders**
+
+- **Status at a glance.** Hero stat cards show counts (X open / Y direction-set / Z resolved) without anyone opening a file.
+- **Visual hierarchy.** Personas, OQs, decisions each get their own section with consistent component patterns. Readers learn the layout once and scan it across every feature.
+- **Zero tooling.** Open the `.html` in a browser. No build, no server, no Markdown viewer. Email it, drop it in Slack, share via cloud storage.
+- **Always in sync.** The skill's concurrent-update rule means the dashboard reflects the markdown at all times — no "is this current?" question.
+
+**How to build one with the bundled skill**
+
+1. **Pick a theme.** [`dashboard/theme/coral_pulse/DESIGN.md`](dashboard/theme/coral_pulse/DESIGN.md) (light, editorial) for discovery dashboards focused on personas, decisions, and open questions. [`dashboard/theme/dark_indigo/DESIGN.md`](dashboard/theme/dark_indigo/DESIGN.md) (dark, data) for metrics, audit pattern reports, or anything chart-heavy.
+2. **Copy the reference.** Start from [`dashboard/reference/dashboard.html`](dashboard/reference/dashboard.html), not from scratch.
+3. **Follow the content guide.** [`templates/dashboard-guide.md`](templates/dashboard-guide.md) lists required vs. optional sections and the concurrent-update rule.
+4. **Read the lessons.** [`dashboard/BEST_PRACTICES.md`](dashboard/BEST_PRACTICES.md) covers chart settings, badge colors, sidebar patterns, and common mistakes to avoid.
+
+Save the result at `requirements/<FeatureName>/dashboard.html` and commit it alongside the markdown.
+
 ## Personas
 
 The default persona loads with `Load Disco`:
@@ -165,7 +187,12 @@ Full persona definitions live in [`activation/claude-code/`](activation/claude-c
 | `templates/spec-template.md` | Implementation-ready spec with TDD-first agent handoff |
 | `templates/adr-template.md` | Architecture/product decision record |
 | `templates/audit-template.md` | Audit entry + audit index format |
-| `templates/dashboard-guide.md` | Generic single-file dashboard pattern |
+| `templates/dashboard-guide.md` | What a discovery dashboard contains and when to update it (content-focused) |
+| `dashboard/SKILL.md` | Bundled dashboard build skill — theme selection, architecture, palettes |
+| `dashboard/BEST_PRACTICES.md` | Accumulated lessons for building dashboards with the bundled themes |
+| `dashboard/reference/dashboard.html` | Reference single-file dashboard skeleton (Dark Indigo); copy as starting point |
+| `dashboard/theme/coral_pulse/DESIGN.md` | Coral Pulse — light editorial theme, full token reference |
+| `dashboard/theme/dark_indigo/DESIGN.md` | Dark Indigo — dark data theme, full token reference + Chart.js guide + complete skeleton |
 | `activation/claude-code/load-disco.md` | Claude Code activation entrypoint (loads Disco only) |
 | `activation/claude-code/activate-barry.md` | On-demand Barry activation |
 | `activation/claude-code/barry-persona.md` | Full Barry persona definition |

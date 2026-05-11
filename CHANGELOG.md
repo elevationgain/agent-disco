@@ -14,6 +14,54 @@ open a new empty `[Unreleased]` section above it.
 
 ### Added
 
+- **Bundled dashboard skill at `dashboard/`.** Generalized subset of an
+  internal dashboard design system, repackaged as a public companion to
+  Agent Disco. Adopters now get a working visual implementation out of the
+  box rather than only a content guide.
+  - `dashboard/SKILL.md` — theme selection, architecture, palettes, build
+    workflow, output conventions tied to
+    `requirements/<FeatureName>/dashboard.html`.
+  - `dashboard/BEST_PRACTICES.md` — accumulated lessons (theme choice,
+    sidebar behavior, hero architecture, card system, typography scale,
+    Chart.js integration, common mistakes per theme, pre-share checklist).
+  - `dashboard/reference/dashboard.html` — single-file Dark Indigo
+    reference dashboard with sidebar, hero, stat cards, and section
+    skeletons. Copy as the starting point for new builds.
+  - `dashboard/theme/coral_pulse/DESIGN.md` — light editorial theme.
+    Recommended for discovery dashboards (personas, decisions, open
+    questions). Tailwind CDN + Plus Jakarta Sans + Manrope.
+  - `dashboard/theme/dark_indigo/DESIGN.md` — dark data-focused theme.
+    Recommended for metrics, audit reports, and chart-heavy dashboards.
+    Plain CSS custom properties + Chart.js integration guide + complete
+    HTML skeleton.
+- **New `## Dashboard` section in `README.md`** explaining the
+  stakeholder value (status at a glance, visual hierarchy, zero tooling,
+  always in sync) and the four-step build workflow (pick a theme, copy
+  the reference, follow the content guide, read the lessons).
+
+### Changed
+
+- **`templates/dashboard-guide.md` reframed as content-focused.** Now
+  cross-references the bundled `dashboard/` skill for visual
+  implementation, and points to Coral Pulse / Dark Indigo as the
+  theme-aware path. Continues to own the "what content goes in a
+  discovery dashboard" question independent of theme choice.
+- **`SKILL.md` cross-references `dashboard/`** alongside
+  `templates/dashboard-guide.md` in both the per-feature folder structure
+  block and the templates list.
+- **`README.md` Repository Layout extended** with five new rows
+  (`dashboard/SKILL.md`, `BEST_PRACTICES.md`, `reference/dashboard.html`,
+  and the two `theme/*/DESIGN.md` files); existing
+  `templates/dashboard-guide.md` row reworded to clarify its
+  content-focused role.
+
+### Notes on the bundled subset
+
+- Examples folder (`examples/rev3_*`) and screenshots from the source
+  skill were intentionally not included. The reference dashboard plus the
+  two theme `DESIGN.md` files cover the same patterns at a level public
+  adopters can build from.
+
 - **New phase: Plan.** Agent Disco now formalizes a Plan step between the
   Readiness Gate and Test/Code, parallel to native plan modes in popular AI
   coding agents (Cursor Plan, Claude Code `/plan`, spec-kit `/tasks`).
