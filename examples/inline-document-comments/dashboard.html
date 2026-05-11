@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inline Document Comments — Discovery Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+<style>
+  /* ── Coral Pulse design tokens ───────────────────────────────────── */
+  :root {
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --surface-alt: #f3f0ec;
+    --border: #e5e1db;
+    --text: #1e1e2e;
+    --text-muted: #6b6b7b;
+    --accent: #e8614d;
+    --accent-light: #f08c7a;
+    --red: #dc3545;
+    --amber: #d97706;
+    --green: #16a34a;
+    --cyan: #0891b2;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+    font-size: 0.9rem;
+  }
+  h1, h2, h3, h4, h5, h6 { font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text); }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; }
+  .section { scroll-margin-top: 80px; padding: 2.5rem 0 1rem; }
+  .section + .section { border-top: 1px solid var(--border); }
+
+  /* ── Sidebar ─────────────────────────────────────────────────────── */
+  #sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0; width: 256px; z-index: 50;
+    background: var(--surface); border-right: 1px solid var(--border);
+    box-shadow: 1px 0 8px rgba(0,0,0,0.04);
+    display: flex; flex-direction: column;
+    padding: 1.25rem 1rem;
+    overflow: hidden;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #sidebar.collapsed { width: 64px; }
+  #sidebar .nav-label, #sidebar .sidebar-title, #sidebar .sidebar-subtitle,
+  #sidebar .sidebar-section-label, #sidebar .sidebar-footer-text, #sidebar .specs-placeholder {
+    transition: opacity 0.18s ease; white-space: nowrap;
+  }
+  #sidebar.collapsed .nav-label, #sidebar.collapsed .sidebar-title,
+  #sidebar.collapsed .sidebar-subtitle, #sidebar.collapsed .sidebar-section-label,
+  #sidebar.collapsed .sidebar-footer-text, #sidebar.collapsed .specs-placeholder {
+    opacity: 0; width: 0; overflow: hidden;
+  }
+  #sidebar.collapsed .nav-item { justify-content: center; padding-left: 0; padding-right: 0; gap: 0; }
+  #sidebar.collapsed .sidebar-header { justify-content: center; gap: 0; }
+
+  .sidebar-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.5rem; padding: 0 .25rem; }
+  .sidebar-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--accent); color: #fff; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sidebar-title { font-size: .9rem; font-weight: 700; color: var(--accent); line-height: 1.2; }
+  .sidebar-subtitle { font-size: .625rem; text-transform: uppercase; letter-spacing: .12em; color: var(--text-muted); font-weight: 700; margin-top: 1px; }
+
+  .sidebar-section-label {
+    padding: 0 .5rem; margin: 1rem 0 .35rem;
+    font-size: .65rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .12em; color: var(--text-muted);
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: .65rem;
+    padding: .45rem .55rem; border-radius: 8px;
+    font-size: .85rem; color: var(--text); font-weight: 500;
+    cursor: pointer;
+  }
+  .nav-item:hover { background: var(--surface-alt); }
+  .nav-item.active { background: var(--surface-alt); color: var(--accent); font-weight: 700; }
+  .nav-item .material-symbols-outlined { font-size: 1.15rem; color: var(--text-muted); }
+  .nav-item.active .material-symbols-outlined { color: var(--accent); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+  .dot-red { background: var(--red); box-shadow: 0 0 6px rgba(220,53,69,0.25); }
+  .dot-amber { background: var(--amber); box-shadow: 0 0 6px rgba(217,119,6,0.25); }
+  .dot-green { background: var(--green); box-shadow: 0 0 6px rgba(22,163,74,0.25); }
+  .specs-placeholder { font-size: .75rem; color: var(--text-muted); padding: .25rem .55rem; font-style: italic; }
+  .sidebar-footer { margin-top: auto; padding: .75rem .5rem 0; border-top: 1px solid var(--border); }
+  .sidebar-footer-text { font-size: .7rem; color: var(--text-muted); line-height: 1.45; }
+
+  .collapse-toggle {
+    position: absolute; top: 1.25rem; right: -14px;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text-muted); z-index: 60;
+  }
+  .collapse-toggle:hover { color: var(--accent); }
+  .collapse-toggle .material-symbols-outlined { font-size: 1.05rem; }
+
+  /* ── Main layout ─────────────────────────────────────────────────── */
+  #main {
+    margin-left: 256px;
+    transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  #main.sidebar-collapsed { margin-left: 64px; }
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 2rem 4rem; }
+
+  /* ── Hero ────────────────────────────────────────────────────────── */
+  .top-badges { display: flex; gap: .5rem; margin: 2rem 0 1.25rem; flex-wrap: wrap; }
+  .top-badge {
+    display: inline-flex; align-items: center; gap: .35rem;
+    padding: .3rem .65rem; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border);
+    font-size: .7rem; font-weight: 600; color: var(--text-muted);
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .top-badge .material-symbols-outlined { font-size: .95rem; }
+  .top-badge.live { color: var(--accent); border-color: rgba(232,97,77,.35); background: rgba(232,97,77,.06); }
+
+  .hero-card {
+    background: linear-gradient(135deg, var(--accent) 0%, #c94535 100%);
+    color: #fff; border: none; border-radius: 16px;
+    padding: 2.5rem 2.5rem 2.25rem;
+    position: relative; overflow: hidden;
+  }
+  .hero-card::before {
+    content: ""; position: absolute; right: -80px; top: -80px;
+    width: 280px; height: 280px; border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .hero-card::after {
+    content: ""; position: absolute; right: 60px; bottom: -100px;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+  }
+  .hero-eyebrow {
+    text-transform: uppercase; letter-spacing: .14em;
+    font-size: .7rem; font-weight: 700; opacity: .85;
+    margin-bottom: .65rem; position: relative; z-index: 1;
+  }
+  .hero-title {
+    font-size: 2.4rem; font-weight: 800; line-height: 1.1;
+    margin-bottom: .5rem; position: relative; z-index: 1;
+  }
+  .hero-tagline {
+    font-size: 1.1rem; font-weight: 500; opacity: .9;
+    margin-bottom: 1.25rem; position: relative; z-index: 1;
+    max-width: 660px;
+  }
+  .hero-description {
+    font-size: .95rem; opacity: .85; max-width: 720px;
+    position: relative; z-index: 1; line-height: 1.55;
+  }
+  .hero-meta {
+    display: flex; gap: 1.75rem; margin-top: 1.5rem;
+    position: relative; z-index: 1; font-size: .8rem;
+  }
+  .hero-meta-item { display: flex; flex-direction: column; gap: .15rem; }
+  .hero-meta-label { text-transform: uppercase; letter-spacing: .1em; opacity: .7; font-size: .65rem; font-weight: 700; }
+  .hero-meta-value { font-weight: 700; font-size: .95rem; }
+
+  /* ── Stat cards ──────────────────────────────────────────────────── */
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;
+    margin-top: 1.25rem;
+  }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.15rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .stat-label {
+    font-size: .65rem; text-transform: uppercase; letter-spacing: .1em;
+    font-weight: 700; color: var(--text-muted); margin-bottom: .35rem;
+  }
+  .stat-value { font-size: 1.75rem; font-weight: 700; line-height: 1.05; }
+  .stat-detail { font-size: .75rem; color: var(--text-muted); margin-top: .35rem; }
+  .stat-value.red { color: var(--red); }
+  .stat-value.amber { color: var(--amber); }
+  .stat-value.green { color: var(--green); }
+  .stat-value.accent { color: var(--accent); }
+
+  /* ── Section headings ────────────────────────────────────────────── */
+  .section-title {
+    display: flex; align-items: baseline; gap: .65rem; margin-bottom: 1.1rem;
+  }
+  .section-title h2 { font-size: 1.35rem; font-weight: 700; }
+  .section-title .count {
+    font-size: .8rem; color: var(--text-muted); font-weight: 600;
+  }
+  .section-subtitle { color: var(--text-muted); font-size: .85rem; margin-bottom: 1.1rem; max-width: 720px; }
+
+  /* ── Generic card grid ───────────────────────────────────────────── */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.25rem 1.35rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: box-shadow .18s ease;
+  }
+  .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .35rem; }
+  .card p { font-size: .85rem; color: var(--text); line-height: 1.5; }
+
+  /* ── Persona cards ───────────────────────────────────────────────── */
+  .persona-card { display: flex; flex-direction: column; gap: .85rem; }
+  .persona-header { display: flex; align-items: center; gap: .85rem; }
+  .persona-avatar {
+    width: 44px; height: 44px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 1rem; flex-shrink: 0;
+  }
+  .persona-avatar.lina { background: linear-gradient(135deg, var(--accent), #c94535); }
+  .persona-avatar.marcus { background: linear-gradient(135deg, var(--cyan), #0e7490); }
+  .persona-avatar.priya { background: linear-gradient(135deg, var(--amber), #b45309); }
+  .persona-name { font-size: 1rem; font-weight: 700; line-height: 1.1; }
+  .persona-role { font-size: .75rem; color: var(--text-muted); margin-top: .15rem; }
+  .persona-section { font-size: .8rem; }
+  .persona-section-label {
+    font-size: .65rem; text-transform: uppercase; letter-spacing: .1em;
+    font-weight: 700; color: var(--text-muted); margin-bottom: .15rem;
+  }
+  .persona-tags { display: flex; gap: .35rem; flex-wrap: wrap; }
+  .persona-tag {
+    font-size: .7rem; padding: .15rem .55rem; border-radius: 999px;
+    background: var(--surface-alt); color: var(--text-muted); font-weight: 600;
+  }
+
+  /* ── Discovery area cards ────────────────────────────────────────── */
+  .area-card {
+    display: flex; flex-direction: column; gap: .65rem;
+  }
+  .area-header { display: flex; align-items: center; gap: .55rem; }
+  .area-prefix {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .65rem; font-weight: 800; letter-spacing: .08em;
+    padding: .12rem .45rem; border-radius: 5px;
+    background: var(--surface-alt); color: var(--text-muted);
+  }
+  .area-card h3 { font-size: 1rem; }
+  .area-stats { display: flex; gap: 1rem; font-size: .75rem; color: var(--text-muted); }
+  .area-stat { display: flex; align-items: center; gap: .35rem; }
+  .area-progress {
+    height: 6px; background: var(--surface-alt); border-radius: 999px; overflow: hidden;
+    display: flex;
+  }
+  .area-progress > div { height: 100%; }
+  .area-progress .seg-red { background: var(--red); }
+  .area-progress .seg-amber { background: var(--amber); }
+  .area-progress .seg-green { background: var(--green); }
+
+  /* ── Badges (status, severity) ───────────────────────────────────── */
+  .badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .7rem; padding: .15rem .55rem; border-radius: 6px;
+    font-weight: 700; letter-spacing: .02em; line-height: 1.4;
+  }
+  .badge-red    { background: rgba(220,53,69,.1);  color: var(--red); }
+  .badge-amber  { background: rgba(217,119,6,.1);  color: var(--amber); }
+  .badge-green  { background: rgba(22,163,74,.1);  color: var(--green); }
+  .badge-cyan   { background: rgba(8,145,178,.1);  color: var(--cyan); }
+  .badge-muted  { background: rgba(107,107,123,.1); color: var(--text-muted); }
+  .badge-accent { background: rgba(232,97,77,.1);  color: var(--accent); }
+
+  /* ── OQ groups ───────────────────────────────────────────────────── */
+  .oq-group { margin-bottom: 1.5rem; }
+  .oq-group-header {
+    display: flex; align-items: center; gap: .55rem;
+    margin: 0 0 .6rem; font-size: .7rem; text-transform: uppercase;
+    letter-spacing: .12em; font-weight: 800; color: var(--text-muted);
+  }
+  .oq-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem 1.15rem; margin-bottom: .65rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    transition: box-shadow .18s ease;
+  }
+  .oq-card:hover { box-shadow: 0 3px 10px rgba(0,0,0,0.07); }
+  .oq-head { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; }
+  .oq-id {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .7rem; font-weight: 800; letter-spacing: .04em;
+    padding: .12rem .45rem; border-radius: 5px;
+    background: var(--surface-alt); color: var(--text-muted);
+  }
+  .oq-title { font-size: .95rem; font-weight: 700; flex: 1; min-width: 200px; }
+  .oq-body { font-size: .85rem; color: var(--text); margin-top: .45rem; line-height: 1.5; }
+  .oq-leaning {
+    margin-top: .65rem; padding: .65rem .85rem;
+    background: var(--surface-alt); border-left: 3px solid var(--accent);
+    border-radius: 0 8px 8px 0; font-size: .8rem; color: var(--text);
+  }
+  .oq-leaning strong {
+    text-transform: uppercase; letter-spacing: .08em;
+    font-size: .65rem; font-weight: 800; color: var(--accent);
+    margin-right: .5rem;
+  }
+  .oq-leaning.green { border-left-color: var(--green); }
+  .oq-leaning.green strong { color: var(--green); }
+  .oq-meta { display: flex; gap: .85rem; margin-top: .55rem; font-size: .7rem; color: var(--text-muted); flex-wrap: wrap; }
+  .oq-meta span { display: inline-flex; align-items: center; gap: .25rem; }
+  .oq-meta .material-symbols-outlined { font-size: .9rem; }
+
+  /* ── Decision (ADR) cards ────────────────────────────────────────── */
+  .adr-card { display: flex; flex-direction: column; gap: .85rem; }
+  .adr-head { display: flex; align-items: center; gap: .55rem; }
+  .adr-id {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .7rem; font-weight: 800; letter-spacing: .05em;
+    padding: .15rem .55rem; border-radius: 5px;
+    background: rgba(232,97,77,.1); color: var(--accent);
+  }
+  .adr-card h3 { font-size: 1rem; }
+  .adr-section-label {
+    font-size: .65rem; text-transform: uppercase; letter-spacing: .1em;
+    font-weight: 700; color: var(--text-muted); margin-bottom: .25rem;
+  }
+  .adr-rationale { font-size: .82rem; color: var(--text); line-height: 1.5; }
+  .adr-rejected { font-size: .78rem; color: var(--text-muted); font-style: italic; }
+  .adr-rejected::before { content: "Rejected: "; font-style: normal; font-weight: 700; color: var(--text-muted); }
+
+  /* ── Risk callouts ───────────────────────────────────────────────── */
+  .risk-list { display: flex; flex-direction: column; gap: .65rem; }
+  .callout {
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .callout.danger { border-left-color: var(--red); }
+  .callout.warning { border-left-color: var(--amber); }
+  .callout.success { border-left-color: var(--green); }
+  .callout-head { display: flex; align-items: center; gap: .55rem; margin-bottom: .35rem; }
+  .callout-head h4 { font-size: .95rem; font-weight: 700; }
+  .callout-body { font-size: .82rem; color: var(--text); line-height: 1.5; }
+  .callout-mitigation { font-size: .78rem; color: var(--text-muted); margin-top: .45rem; }
+  .callout-mitigation strong { color: var(--text); font-weight: 700; }
+
+  /* ── Flow steps ──────────────────────────────────────────────────── */
+  .flow {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 0;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .flow-step { padding: 0 .85rem; position: relative; }
+  .flow-step + .flow-step::before {
+    content: ""; position: absolute; left: -8px; top: 16px;
+    width: 16px; border-top: 2px dashed var(--border);
+  }
+  .flow-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--surface-alt); color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: .85rem; margin-bottom: .65rem;
+  }
+  .flow-title { font-size: .85rem; font-weight: 700; margin-bottom: .35rem; line-height: 1.25; }
+  .flow-body { font-size: .75rem; color: var(--text-muted); line-height: 1.45; }
+
+  /* ── Summary callout ─────────────────────────────────────────────── */
+  .summary-callout {
+    margin-top: 1.25rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-left: 4px solid var(--accent); border-radius: 0 12px 12px 0;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .summary-callout p { font-size: .85rem; color: var(--text); line-height: 1.55; }
+
+  /* ── Responsive ──────────────────────────────────────────────────── */
+  @media (max-width: 1100px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .flow { grid-template-columns: 1fr 1fr; row-gap: 1.5rem; }
+    .flow-step + .flow-step::before { display: none; }
+  }
+  @media (max-width: 720px) {
+    .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr; }
+    .flow { grid-template-columns: 1fr; }
+    .container { padding: 0 1.25rem 3rem; }
+    #sidebar { transform: translateX(-100%); }
+    #sidebar.mobile-open { transform: translateX(0); }
+    #main, #main.sidebar-collapsed { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<aside id="sidebar">
+  <button class="collapse-toggle" id="collapseToggle" aria-label="Toggle sidebar">
+    <span class="material-symbols-outlined" id="collapseIcon">chevron_left</span>
+  </button>
+
+  <div class="sidebar-header">
+    <div class="sidebar-icon"><span class="material-symbols-outlined">forum</span></div>
+    <div>
+      <div class="sidebar-title">Inline Comments</div>
+      <div class="sidebar-subtitle">Product Discovery</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section-label">Discovery</div>
+  <div class="nav-item active" data-nav="overview"><span class="material-symbols-outlined">view_quilt</span><span class="nav-label">Overview</span></div>
+  <div class="nav-item" data-nav="personas"><span class="material-symbols-outlined">groups</span><span class="nav-label">Personas</span></div>
+  <div class="nav-item" data-nav="areas"><span class="material-symbols-outlined">category</span><span class="nav-label">Discovery Areas</span></div>
+  <div class="nav-item" data-nav="anchoring"><span class="dot dot-red"></span><span class="nav-label">Anchoring &amp; Resolution</span></div>
+  <div class="nav-item" data-nav="notifications"><span class="dot dot-amber"></span><span class="nav-label">Notifications</span></div>
+  <div class="nav-item" data-nav="permissions"><span class="dot dot-amber"></span><span class="nav-label">Permissions</span></div>
+  <div class="nav-item" data-nav="mobile"><span class="dot dot-red"></span><span class="nav-label">Mobile Experience</span></div>
+  <div class="nav-item" data-nav="mentions"><span class="dot dot-amber"></span><span class="nav-label">Mentions</span></div>
+  <div class="nav-item" data-nav="version"><span class="dot dot-amber"></span><span class="nav-label">Version History</span></div>
+
+  <div class="sidebar-section-label">Specs</div>
+  <div class="specs-placeholder">Pending — see ANC-01</div>
+
+  <div class="sidebar-section-label">Decisions</div>
+  <div class="nav-item" data-nav="decisions"><span class="material-symbols-outlined">gavel</span><span class="nav-label">3 ADRs ratified</span></div>
+
+  <div class="sidebar-section-label">Risks &amp; Flow</div>
+  <div class="nav-item" data-nav="flow"><span class="material-symbols-outlined">timeline</span><span class="nav-label">Primary Flow</span></div>
+  <div class="nav-item" data-nav="risks"><span class="material-symbols-outlined">warning</span><span class="nav-label">Risk Register</span></div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-footer-text">
+      <strong>Last updated</strong><br>
+      May 11, 2026<br>
+      <span style="color: var(--text-muted);">by Lina via Disco</span>
+    </div>
+  </div>
+</aside>
+
+<main id="main">
+<div class="container">
+
+  <!-- ─── OVERVIEW ─────────────────────────────────────────────── -->
+  <section class="section" id="overview">
+    <div class="top-badges">
+      <span class="top-badge live"><span class="material-symbols-outlined">radio_button_checked</span>Discovery Open</span>
+      <span class="top-badge"><span class="material-symbols-outlined">schedule</span>Updated May 11, 2026</span>
+      <span class="top-badge"><span class="material-symbols-outlined">edit_note</span>Spec Pending</span>
+      <span class="top-badge"><span class="material-symbols-outlined">groups</span>Acme Docs</span>
+    </div>
+
+    <div class="hero-card">
+      <div class="hero-eyebrow">Feature Discovery</div>
+      <h1 class="hero-title">Inline Document Comments</h1>
+      <p class="hero-tagline">Anchored discussions for long-form documents in Acme Docs.</p>
+      <p class="hero-description">
+        Reviewers should be able to highlight any range of text and start a discussion
+        thread that survives edits, mentions, and version history without overwhelming
+        participants with notifications. The discovery is mid-cycle: anchoring behavior
+        and mobile UX are the open structural questions; notifications, permissions, and
+        mentions are converging.
+      </p>
+      <div class="hero-meta">
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Phase</span>
+          <span class="hero-meta-value">Discovery → Spec</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Lead</span>
+          <span class="hero-meta-value">Lina (PM)</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Target Release</span>
+          <span class="hero-meta-value">Q3 — Acme Docs 4.2</span>
+        </div>
+        <div class="hero-meta-item">
+          <span class="hero-meta-label">Spec Blocker</span>
+          <span class="hero-meta-value">ANC-01</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-label">Open Questions</div>
+        <div class="stat-value accent">13</div>
+        <div class="stat-detail">across 6 discovery areas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Open</div>
+        <div class="stat-value red">7</div>
+        <!-- MATH: 7/13 = 53.8% -->
+        <div class="stat-detail">54% of total — needs decision</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Direction Set</div>
+        <div class="stat-value amber">3</div>
+        <!-- MATH: 3/13 = 23.1% -->
+        <div class="stat-detail">23% — leaning recorded, awaiting ADR</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Resolved</div>
+        <div class="stat-value green">3</div>
+        <!-- MATH: 3/13 = 23.1% -->
+        <div class="stat-detail">23% — ratified by ADR</div>
+      </div>
+    </div>
+
+    <div class="summary-callout">
+      <p>
+        <strong>Status:</strong> 13 open questions across 6 discovery areas. 3 ADRs ratified.
+        5 risks tracked. <strong>Spec work begins after ANC-01 (anchor migration semantics)
+        is resolved</strong> — the rest of the open questions are independent and can
+        proceed in parallel once anchoring behavior is locked.
+      </p>
+    </div>
+  </section>
+
+  <!-- ─── PERSONAS ─────────────────────────────────────────────── -->
+  <section class="section" id="personas">
+    <div class="section-title">
+      <h2>Personas</h2>
+      <span class="count">3 named actors</span>
+    </div>
+    <p class="section-subtitle">
+      Personas are validated against in-product usage data from Acme Docs (Q1 2026 cohort).
+      All three are concurrent users on the same document in 80% of comment-heavy sessions.
+    </p>
+    <div class="grid-3">
+
+      <div class="card persona-card">
+        <div class="persona-header">
+          <div class="persona-avatar lina">L</div>
+          <div>
+            <div class="persona-name">Lina</div>
+            <div class="persona-role">Senior PM, Document Author</div>
+          </div>
+        </div>
+        <div class="persona-section">
+          <div class="persona-section-label">Goal</div>
+          Author product specs that survive contentious multi-stakeholder review.
+        </div>
+        <div class="persona-section">
+          <div class="persona-section-label">Friction Today</div>
+          Comments lose context when she edits the surrounding text. She avoids restructuring
+          mid-review because it erases discussions.
+        </div>
+        <div class="persona-section">
+          <div class="persona-tags">
+            <span class="persona-tag">Heavy commenter</span>
+            <span class="persona-tag">Multi-reviewer</span>
+            <span class="persona-tag">Notification-tolerant</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card persona-card">
+        <div class="persona-header">
+          <div class="persona-avatar marcus">M</div>
+          <div>
+            <div class="persona-name">Marcus</div>
+            <div class="persona-role">Engineering Lead, Technical Reviewer</div>
+          </div>
+        </div>
+        <div class="persona-section">
+          <div class="persona-section-label">Goal</div>
+          Surface only the technical decisions that need his sign-off; ignore everything else.
+        </div>
+        <div class="persona-section">
+          <div class="persona-section-label">Friction Today</div>
+          Notification spam from unrelated threads in the same doc. He mutes channels rather
+          than triages.
+        </div>
+        <div class="persona-section">
+          <div class="persona-tags">
+            <span class="persona-tag">High signal needed</span>
+            <span class="persona-tag">@mentions only</span>
+            <span class="persona-tag">Mobile + desktop</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card persona-card">
+        <div class="persona-header">
+          <div class="persona-avatar priya">P</div>
+          <div>
+            <div class="persona-name">Priya</div>
+            <div class="persona-role">Legal/Compliance, Casual Reviewer</div>
+          </div>
+        </div>
+        <div class="persona-section">
+          <div class="persona-section-label">Goal</div>
+          Review one section, leave a single comment, never come back.
+        </div>
+        <div class="persona-section">
+          <div class="persona-section-label">Friction Today</div>
+          No way to filter to "just my comments." She loses her thread in long docs and
+          re-litigates points that were already resolved.
+        </div>
+        <div class="persona-section">
+          <div class="persona-tags">
+            <span class="persona-tag">Single visit</span>
+            <span class="persona-tag">Context-poor</span>
+            <span class="persona-tag">Email-driven</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── DISCOVERY AREAS ──────────────────────────────────────── -->
+  <section class="section" id="areas">
+    <div class="section-title">
+      <h2>Discovery Areas</h2>
+      <span class="count">6 areas · 13 OQs</span>
+    </div>
+    <div class="grid-3">
+
+      <div class="card area-card">
+        <div class="area-header">
+          <span class="area-prefix">ANC</span>
+          <span class="badge badge-red"><span class="dot dot-red"></span>Open</span>
+        </div>
+        <h3>Anchoring &amp; Resolution</h3>
+        <p>How comments anchor to text, what happens when text is edited or deleted, and the resolution lifecycle.</p>
+        <div class="area-progress" aria-label="2 open, 1 direction, 0 resolved">
+          <!-- 2/3 red, 1/3 amber, 0/3 green -->
+          <div class="seg-red" style="width: 66.6%"></div>
+          <div class="seg-amber" style="width: 33.3%"></div>
+        </div>
+        <div class="area-stats">
+          <span class="area-stat"><span class="dot dot-red"></span>2 open</span>
+          <span class="area-stat"><span class="dot dot-amber"></span>1 direction</span>
+          <span class="area-stat"><span class="dot dot-green"></span>0 resolved</span>
+        </div>
+      </div>
+
+      <div class="card area-card">
+        <div class="area-header">
+          <span class="area-prefix">NTF</span>
+          <span class="badge badge-amber"><span class="dot dot-amber"></span>Direction set</span>
+        </div>
+        <h3>Notifications</h3>
+        <p>Notification scope, cadence, and routing across email, push, and in-app inbox.</p>
+        <div class="area-progress">
+          <!-- 1/3 red, 0 amber, 2/3 green -->
+          <div class="seg-red" style="width: 33.3%"></div>
+          <div class="seg-green" style="width: 66.6%"></div>
+        </div>
+        <div class="area-stats">
+          <span class="area-stat"><span class="dot dot-red"></span>1 open</span>
+          <span class="area-stat"><span class="dot dot-amber"></span>0 direction</span>
+          <span class="area-stat"><span class="dot dot-green"></span>2 resolved</span>
+        </div>
+      </div>
+
+      <div class="card area-card">
+        <div class="area-header">
+          <span class="area-prefix">PERM</span>
+          <span class="badge badge-amber"><span class="dot dot-amber"></span>Direction set</span>
+        </div>
+        <h3>Permissions</h3>
+        <p>Who can comment, who can resolve, who can delete — by document role.</p>
+        <div class="area-progress">
+          <!-- 1/2 red, 1/2 amber -->
+          <div class="seg-red" style="width: 50%"></div>
+          <div class="seg-amber" style="width: 50%"></div>
+        </div>
+        <div class="area-stats">
+          <span class="area-stat"><span class="dot dot-red"></span>1 open</span>
+          <span class="area-stat"><span class="dot dot-amber"></span>1 direction</span>
+          <span class="area-stat"><span class="dot dot-green"></span>0 resolved</span>
+        </div>
+      </div>
+
+      <div class="card area-card">
+        <div class="area-header">
+          <span class="area-prefix">MOB</span>
+          <span class="badge badge-red"><span class="dot dot-red"></span>Open</span>
+        </div>
+        <h3>Mobile Experience</h3>
+        <p>Read and write UX on mobile — gesture vs sheet, density, keyboard handling.</p>
+        <div class="area-progress">
+          <div class="seg-red" style="width: 100%"></div>
+        </div>
+        <div class="area-stats">
+          <span class="area-stat"><span class="dot dot-red"></span>1 open</span>
+          <span class="area-stat"><span class="dot dot-amber"></span>0 direction</span>
+          <span class="area-stat"><span class="dot dot-green"></span>0 resolved</span>
+        </div>
+      </div>
+
+      <div class="card area-card">
+        <div class="area-header">
+          <span class="area-prefix">MNT</span>
+          <span class="badge badge-amber"><span class="dot dot-amber"></span>Direction set</span>
+        </div>
+        <h3>Mentions</h3>
+        <p>@-mention picker, autocomplete behavior, and notifying mentioned non-collaborators.</p>
+        <div class="area-progress">
+          <!-- 1/2 red, 1/2 green -->
+          <div class="seg-red" style="width: 50%"></div>
+          <div class="seg-green" style="width: 50%"></div>
+        </div>
+        <div class="area-stats">
+          <span class="area-stat"><span class="dot dot-red"></span>1 open</span>
+          <span class="area-stat"><span class="dot dot-amber"></span>0 direction</span>
+          <span class="area-stat"><span class="dot dot-green"></span>1 resolved</span>
+        </div>
+      </div>
+
+      <div class="card area-card">
+        <div class="area-header">
+          <span class="area-prefix">VER</span>
+          <span class="badge badge-amber"><span class="dot dot-amber"></span>Direction set</span>
+        </div>
+        <h3>Version History</h3>
+        <p>Whether and how comments survive version diffs, restores, and historical reads.</p>
+        <div class="area-progress">
+          <!-- 1/2 red, 1/2 amber -->
+          <div class="seg-red" style="width: 50%"></div>
+          <div class="seg-amber" style="width: 50%"></div>
+        </div>
+        <div class="area-stats">
+          <span class="area-stat"><span class="dot dot-red"></span>1 open</span>
+          <span class="area-stat"><span class="dot dot-amber"></span>1 direction</span>
+          <span class="area-stat"><span class="dot dot-green"></span>0 resolved</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── OPEN QUESTIONS ───────────────────────────────────────── -->
+  <section class="section" id="questions">
+    <div class="section-title">
+      <h2>Open Questions</h2>
+      <span class="count">13 OQs · grouped by status</span>
+    </div>
+
+    <!-- OPEN -->
+    <div class="oq-group" id="anchoring">
+      <div class="oq-group-header"><span class="dot dot-red"></span>Open · 7</div>
+
+      <div class="oq-card">
+        <div class="oq-head">
+          <span class="oq-id">ANC-01</span>
+          <span class="oq-title">When commented text is edited, do anchors migrate, orphan, or auto-resolve?</span>
+          <span class="badge badge-red">Spec blocker</span>
+        </div>
+        <p class="oq-body">Three behaviors are technically feasible. Each has different UX implications: migration preserves intent but can drift; orphaning preserves intent literally but visually clutters; auto-resolve is clean but discards in-progress conversation. We need a default, and we need an opt-out.</p>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Lina (lead)</span>
+          <span><span class="material-symbols-outlined">link</span>Blocks ADR-003</span>
+          <span><span class="material-symbols-outlined">groups</span>All personas affected</span>
+        </div>
+      </div>
+
+      <div class="oq-card">
+        <div class="oq-head">
+          <span class="oq-id">ANC-03</span>
+          <span class="oq-title">Anchoring on fully-deleted text — orphan visibly, auto-archive, or refuse the delete?</span>
+        </div>
+        <p class="oq-body">Open question whether deleting commented text should be allowed at all without warning. Refusing the delete creates a footgun for restructure-heavy authors (Lina); allowing the delete silently risks data loss.</p>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Lina (lead)</span>
+          <span><span class="material-symbols-outlined">link</span>Coupled with ANC-01</span>
+        </div>
+      </div>
+
+      <div class="oq-card" id="notifications">
+        <div class="oq-head">
+          <span class="oq-id">NTF-02</span>
+          <span class="oq-title">How do we surface threads I'm participating in but not @-mentioned in?</span>
+        </div>
+        <p class="oq-body">Default notify scope is @-mentions only (NTF-01, ratified). But participants want awareness of replies on threads they started without subscribing to every thread in the doc. Inbox? Daily digest? In-app badge?</p>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Marcus (lead)</span>
+          <span><span class="material-symbols-outlined">link</span>Depends on NTF-01</span>
+        </div>
+      </div>
+
+      <div class="oq-card" id="permissions">
+        <div class="oq-head">
+          <span class="oq-id">PERM-01</span>
+          <span class="oq-title">Should viewers be able to comment by default, or only commenters?</span>
+        </div>
+        <p class="oq-body">Acme Docs has three roles today: viewer, commenter, editor. The new feature blurs the viewer/commenter line — ad-hoc reviewers like Priya are usually given viewer access and asked to "leave a note." Either we promote viewer to comment-by-default, or we make commenter the more common share role.</p>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Lina (lead)</span>
+          <span><span class="material-symbols-outlined">link</span>Touches sharing flow</span>
+        </div>
+      </div>
+
+      <div class="oq-card" id="mobile">
+        <div class="oq-head">
+          <span class="oq-id">MOB-01</span>
+          <span class="oq-title">Inline annotation gesture vs bottom sheet — which is the primary mobile UX?</span>
+        </div>
+        <p class="oq-body">Inline gesture (long-press to comment) is faster but real estate is brutal. Bottom sheet preserves doc visibility but adds a tap. Need user testing — currently no mobile prototype exists.</p>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Lina + Mobile WG</span>
+          <span><span class="material-symbols-outlined">science</span>User testing pending</span>
+        </div>
+      </div>
+
+      <div class="oq-card" id="mentions">
+        <div class="oq-head">
+          <span class="oq-id">MNT-02</span>
+          <span class="oq-title">Notify mentioned non-collaborators — privacy concern?</span>
+        </div>
+        <p class="oq-body">If Lina @-mentions someone outside the doc's collaborator list, do we send them a notification with the doc title? With the comment text? Privacy/legal review pending. Worst case: leaks confidential project names.</p>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Lina + Legal</span>
+          <span><span class="material-symbols-outlined">warning</span>Privacy risk</span>
+        </div>
+      </div>
+
+      <div class="oq-card" id="version">
+        <div class="oq-head">
+          <span class="oq-id">VER-01</span>
+          <span class="oq-title">Should comments be visible on prior versions, or only on current?</span>
+        </div>
+        <p class="oq-body">If a reader views v3 of a doc that's now on v7, do they see the comments that existed at v3, the comments that exist now (anchored to whatever survived), or nothing? Affects audit trails and post-mortem reading.</p>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Marcus (lead)</span>
+          <span><span class="material-symbols-outlined">link</span>Depends on VER-02</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIRECTION SET -->
+    <div class="oq-group">
+      <div class="oq-group-header"><span class="dot dot-amber"></span>Direction Set · 3</div>
+
+      <div class="oq-card">
+        <div class="oq-head">
+          <span class="oq-id">ANC-02</span>
+          <span class="oq-title">Auto-resolve threads when the author confirms an edit addresses the comment</span>
+        </div>
+        <p class="oq-body">Should there be a one-click "this edit addresses CMNT-X" affordance that auto-resolves the linked thread?</p>
+        <div class="oq-leaning">
+          <strong>Leaning</strong>
+          Yes, with explicit confirmation step (not silent). The author sees a tooltip "Resolve thread?" when they edit text inside an active comment range and the comment then mentions the type of change.
+        </div>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Lina (lead)</span>
+          <span><span class="material-symbols-outlined">link</span>Pairs with ANC-01</span>
+        </div>
+      </div>
+
+      <div class="oq-card">
+        <div class="oq-head">
+          <span class="oq-id">PERM-02</span>
+          <span class="oq-title">Who can delete comments?</span>
+        </div>
+        <p class="oq-body">Owner, author, both, or neither (only resolve)?</p>
+        <div class="oq-leaning">
+          <strong>Leaning</strong>
+          Owner can delete any comment; participants can delete their own only; resolved threads cannot be deleted by anyone (audit trail). Mirrors GitHub's model.
+        </div>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Lina (lead)</span>
+        </div>
+      </div>
+
+      <div class="oq-card">
+        <div class="oq-head">
+          <span class="oq-id">VER-02</span>
+          <span class="oq-title">Carry resolved threads through version diffs?</span>
+        </div>
+        <p class="oq-body">When viewing a version diff, should resolved threads appear (full history) or be hidden (clean view)?</p>
+        <div class="oq-leaning">
+          <strong>Leaning</strong>
+          Hidden by default with a "Show resolved (N)" toggle in the diff toolbar. Default optimizes for the common case (post-merge review), toggle covers the audit case.
+        </div>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">person</span>Marcus (lead)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESOLVED -->
+    <div class="oq-group">
+      <div class="oq-group-header"><span class="dot dot-green"></span>Resolved · 3</div>
+
+      <div class="oq-card">
+        <div class="oq-head">
+          <span class="oq-id">NTF-01</span>
+          <span class="oq-title">Default notification scope: who gets notified on a new comment?</span>
+          <span class="badge badge-green">Resolved</span>
+        </div>
+        <p class="oq-body">Decided: only @-mentioned users get a push notification. Doc participants get an in-app inbox entry. No one is auto-subscribed to all comments.</p>
+        <div class="oq-leaning green">
+          <strong>Resolved</strong>
+          Mentioned-only push. In-app inbox for participants. No auto-subscribe.
+        </div>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">gavel</span>Ratified · ADR (pending number)</span>
+        </div>
+      </div>
+
+      <div class="oq-card">
+        <div class="oq-head">
+          <span class="oq-id">NTF-03</span>
+          <span class="oq-title">Email digest cadence for non-urgent activity</span>
+          <span class="badge badge-green">Resolved</span>
+        </div>
+        <p class="oq-body">Decided: 2-hour rolling digest. Per-comment was rejected (Marcus would mute); daily was rejected (Lina misses same-day reviews).</p>
+        <div class="oq-leaning green">
+          <strong>Resolved</strong>
+          2-hour rolling email digest. See ADR-002.
+        </div>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">gavel</span>Ratified · ADR-002</span>
+        </div>
+      </div>
+
+      <div class="oq-card">
+        <div class="oq-head">
+          <span class="oq-id">MNT-01</span>
+          <span class="oq-title">Use existing MentionPicker or build a comment-specific picker?</span>
+          <span class="badge badge-green">Resolved</span>
+        </div>
+        <p class="oq-body">Decided: reuse the existing MentionPicker component from the sharing flow. Avoid divergent autocomplete behavior across the product.</p>
+        <div class="oq-leaning green">
+          <strong>Resolved</strong>
+          Reuse <code>MentionPicker</code>. See ADR-001.
+        </div>
+        <div class="oq-meta">
+          <span><span class="material-symbols-outlined">gavel</span>Ratified · ADR-001</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── DECISIONS ────────────────────────────────────────────── -->
+  <section class="section" id="decisions">
+    <div class="section-title">
+      <h2>Decisions Ratified</h2>
+      <span class="count">3 ADRs</span>
+    </div>
+    <div class="grid-3">
+
+      <div class="card adr-card">
+        <div class="adr-head">
+          <span class="adr-id">ADR-001</span>
+          <span class="badge badge-green">Ratified</span>
+        </div>
+        <h3>Reuse MentionPicker component</h3>
+        <div>
+          <div class="adr-section-label">Rationale</div>
+          <p class="adr-rationale">The existing MentionPicker in the sharing flow is well-tested and already supports the autocomplete patterns Acme Docs users expect. Building a parallel picker would create divergent UX and double the maintenance burden.</p>
+        </div>
+        <div>
+          <div class="adr-section-label">Resolves</div>
+          <p class="adr-rationale" style="font-size: .78rem; color: var(--text-muted);">MNT-01</p>
+        </div>
+        <p class="adr-rejected">Build a comment-specific picker (rejected — divergent UX, 2× maintenance)</p>
+      </div>
+
+      <div class="card adr-card">
+        <div class="adr-head">
+          <span class="adr-id">ADR-002</span>
+          <span class="badge badge-green">Ratified</span>
+        </div>
+        <h3>Email digest cadence — 2-hour rolling</h3>
+        <div>
+          <div class="adr-section-label">Rationale</div>
+          <p class="adr-rationale">2-hour cadence balances Marcus's signal-to-noise need (he mutes per-comment notifications) with Lina's need for same-day awareness (a daily digest misses end-of-day reviews). Tested in Q1 cohort: opt-out rate 8% vs 31% for per-comment.</p>
+        </div>
+        <div>
+          <div class="adr-section-label">Resolves</div>
+          <p class="adr-rationale" style="font-size: .78rem; color: var(--text-muted);">NTF-03</p>
+        </div>
+        <p class="adr-rejected">Per-comment email (rejected — opt-out rate 31%); daily digest (rejected — misses same-day reviews)</p>
+      </div>
+
+      <div class="card adr-card">
+        <div class="adr-head">
+          <span class="adr-id">ADR-003</span>
+          <span class="badge badge-green">Ratified</span>
+        </div>
+        <h3>Anchoring algorithm — range-fingerprint</h3>
+        <div>
+          <div class="adr-section-label">Rationale</div>
+          <p class="adr-rationale">Range-fingerprint stores a small content-derived signature alongside character offsets. Survives small edits within the anchor range and disambiguates when offsets drift. Implementation maps to the existing Diff service.</p>
+        </div>
+        <div>
+          <div class="adr-section-label">Resolves</div>
+          <p class="adr-rationale" style="font-size: .78rem; color: var(--text-muted);">Anchoring foundation (informs ANC-01, ANC-03)</p>
+        </div>
+        <p class="adr-rejected">Explicit character offsets (rejected — fragile under any edit); semantic anchors (rejected — over-engineered for v1)</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─── PRIMARY FLOW ─────────────────────────────────────────── -->
+  <section class="section" id="flow">
+    <div class="section-title">
+      <h2>Primary Flow — Comment &amp; Resolve</h2>
+      <span class="count">5 steps</span>
+    </div>
+    <p class="section-subtitle">Happy-path for a single comment thread, from selection to resolution. Branches into ANC-01 territory at step 4.</p>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-title">Select text</div>
+        <div class="flow-body">User highlights any range. "Comment" affordance appears in the contextual toolbar.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-title">Compose</div>
+        <div class="flow-body">Inline composer opens with MentionPicker (ADR-001). Submit anchors the thread (ADR-003).</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-title">Reviewers reply</div>
+        <div class="flow-body">@mentioned users get push (NTF-01). Participants get in-app inbox; non-mentioned get 2hr email digest (ADR-002).</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-title">Author edits text</div>
+        <div class="flow-body">Anchored range is touched. <strong>Decision pending: ANC-01</strong> determines migrate vs orphan vs auto-resolve. ANC-02 may surface confirmation.</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-title">Resolve</div>
+        <div class="flow-body">Author or commenter resolves. Resolved threads are read-only and cannot be deleted (audit trail per PERM-02 leaning).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── RISKS ────────────────────────────────────────────────── -->
+  <section class="section" id="risks">
+    <div class="section-title">
+      <h2>Risk Register</h2>
+      <span class="count">5 risks tracked</span>
+    </div>
+    <div class="risk-list">
+
+      <div class="callout danger">
+        <div class="callout-head">
+          <span class="badge badge-red">High</span>
+          <h4>Comment orphaning on text edits — data-loss flavor</h4>
+        </div>
+        <p class="callout-body">If anchoring fails on edit and threads silently disappear, users lose conversation history they expected to be durable. This is the failure mode that turns a productivity feature into a trust-eroding one.</p>
+        <p class="callout-mitigation"><strong>Mitigation:</strong> ANC-01 must explicitly choose visible behavior (orphan with badge, not silent removal). Anchoring algorithm (ADR-003) chosen for edit-survival. Failure-mode test required in spec.</p>
+      </div>
+
+      <div class="callout danger">
+        <div class="callout-head">
+          <span class="badge badge-red">High</span>
+          <h4>Notification fatigue across the participant pool</h4>
+        </div>
+        <p class="callout-body">Comment threads naturally fan out. Without strict scope discipline, every doc participant gets pinged on every reply. Marcus already mutes channels for this reason; we'd push him to mute the product.</p>
+        <p class="callout-mitigation"><strong>Mitigation:</strong> NTF-01 ratified mentioned-only push. ADR-002 caps email cadence at 2hr digest. NTF-02 still open — must land before launch.</p>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-head">
+          <span class="badge badge-amber">Medium</span>
+          <h4>Mobile UX regression in Acme Docs reading mode</h4>
+        </div>
+        <p class="callout-body">Inline gesture (long-press) collides with the existing text-selection menu on iOS. Bottom sheet adds friction to reading-only sessions where 80% of comment-light viewers (Priya cohort) live.</p>
+        <p class="callout-mitigation"><strong>Mitigation:</strong> MOB-01 requires user testing on both patterns before spec. Mobile WG to deliver prototype by end of week.</p>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-head">
+          <span class="badge badge-amber">Medium</span>
+          <h4>Performance at 1000+ comments per document</h4>
+        </div>
+        <p class="callout-body">Long-running specs and contracts can accumulate hundreds of threads. Inline rendering, anchoring fingerprint computation, and notification fan-out all become expensive at scale.</p>
+        <p class="callout-mitigation"><strong>Mitigation:</strong> Spec must include performance budget (p95 doc open &lt; 600ms with 1000 comments). Render virtualization required. Notification fan-out batched server-side.</p>
+      </div>
+
+      <div class="callout warning">
+        <div class="callout-head">
+          <span class="badge badge-amber">Medium</span>
+          <h4>Privacy: notifying mentioned non-collaborators</h4>
+        </div>
+        <p class="callout-body">Mentioning a user outside the doc's collaborator list could leak doc title or comment text in the notification preview. Worst case: confidential project names exposed via Slack/email previews.</p>
+        <p class="callout-mitigation"><strong>Mitigation:</strong> MNT-02 open, blocking on Legal review. Default: notification omits doc title; recipient must request access to see context.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <p style="text-align: center; color: var(--text-muted); font-size: .75rem; margin-top: 3rem;">
+    Generated by <strong style="color: var(--accent);">Agent Disco</strong> · Coral Pulse theme · Single-file dashboard, no build step
+  </p>
+
+</div>
+</main>
+
+<script>
+  // ── Sidebar toggle ─────────────────────────────────────────────
+  const sidebar = document.getElementById('sidebar');
+  const main = document.getElementById('main');
+  const collapseToggle = document.getElementById('collapseToggle');
+  const collapseIcon = document.getElementById('collapseIcon');
+
+  // Restore collapsed state from localStorage
+  if (localStorage.getItem('sidebar-collapsed') === '1') {
+    sidebar.classList.add('collapsed');
+    main.classList.add('sidebar-collapsed');
+    collapseIcon.textContent = 'chevron_right';
+  }
+
+  collapseToggle.addEventListener('click', () => {
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    main.classList.toggle('sidebar-collapsed', isCollapsed);
+    collapseIcon.textContent = isCollapsed ? 'chevron_right' : 'chevron_left';
+    localStorage.setItem('sidebar-collapsed', isCollapsed ? '1' : '0');
+  });
+
+  // ── Scroll spy ─────────────────────────────────────────────────
+  const sections = document.querySelectorAll('.section');
+  const navItems = document.querySelectorAll('[data-nav]');
+  const navMap = {};
+  navItems.forEach(item => { navMap[item.dataset.nav] = item; });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navItems.forEach(item => item.classList.remove('active'));
+        const nav = navMap[entry.target.id];
+        if (nav) nav.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-25% 0px -65% 0px' });
+  sections.forEach(section => observer.observe(section));
+
+  // Smooth scroll on nav click
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const target = document.getElementById(item.dataset.nav);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+</script>
+
+</body>
+</html>

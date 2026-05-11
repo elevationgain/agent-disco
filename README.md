@@ -139,6 +139,14 @@ A typical Agent Disco spec with all maps populated fits in roughly 15–30k toke
 
 *A single HTML file your stakeholders will actually read.*
 
+<p align="center">
+  <a href="examples/inline-document-comments/dashboard.html">
+    <img src="examples/inline-document-comments/dashboard-preview.jpg" alt="Discovery dashboard for the Inline Document Comments example feature, rendered in the Coral Pulse theme — sidebar with discovery area status dots, gradient hero card, four stat cards (13 OQs, 7 open, 3 direction set, 3 resolved), and three persona cards" width="720">
+  </a>
+  <br>
+  <em><a href="examples/inline-document-comments/dashboard.html">Live example</a> — discovery dashboard for the worked <a href="examples/inline-document-comments/">Inline Document Comments</a> feature, Coral Pulse theme.</em>
+</p>
+
 The markdown artifacts under `requirements/<FeatureName>/` are exhaustive — they're built for engineers, AI agents, and PMs in the weeds. They are not built for the executive who has 30 seconds before their next meeting. The optional `dashboard.html` solves this: a single self-contained file that opens in any browser and surfaces hero metrics, persona cards, open-question status, decisions, and risk callouts in a visual layout designed to be scanned, not read.
 
 **Why a dashboard beats markdown for stakeholders**
@@ -193,6 +201,7 @@ Full persona definitions live in [`activation/claude-code/`](activation/claude-c
 | `dashboard/reference/dashboard.html` | Reference single-file dashboard skeleton (Dark Indigo); copy as starting point |
 | `dashboard/theme/coral_pulse/DESIGN.md` | Coral Pulse — light editorial theme, full token reference |
 | `dashboard/theme/dark_indigo/DESIGN.md` | Dark Indigo — dark data theme, full token reference + Chart.js guide + complete skeleton |
+| `examples/inline-document-comments/` | Worked example: discovery dashboard for a hypothetical Acme Docs feature (Coral Pulse theme) |
 | `activation/claude-code/load-disco.md` | Claude Code activation entrypoint (loads Disco only) |
 | `activation/claude-code/activate-barry.md` | On-demand Barry activation |
 | `activation/claude-code/barry-persona.md` | Full Barry persona definition |
