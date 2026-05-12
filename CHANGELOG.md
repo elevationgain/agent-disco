@@ -68,6 +68,24 @@ open a new empty `[Unreleased]` section above it.
   in the `## Notes for Cursor` block of `activation/cursor/load-disco.md`
   and the equivalent headers of the Cursor persona files.
 
+### Changed — README intro
+
+- **Top-of-README problem/answer paragraphs rebalanced** to surface the
+  two product attributes that distinguish an Agent Disco spec, not just
+  one. The previous copy framed both the problem and the answer around
+  context (semantic maps), which undersold the agent-executable side of
+  the deliverable.
+  - **The problem** is now pitched as "specs written for humans don't
+    survive contact with AI coding agents" rather than as a generic
+    context problem. Tightened the workaround critique from two sentences
+    to one parenthetical.
+  - **The answer** now leads with **TDD-first contracts** (failing tests
+    before any code, every requirement traceable to a test assertion)
+    *and* **semantic maps** — both billed as the shape that makes a spec
+    actually executable, instead of semantic maps standing alone.
+  - Net wordcount: ~150 → ~160 words. The 10-word delta pays for the
+    previously-missing agent-first product framing.
+
 ### Changed — Attribution
 
 - **`LICENSE` copyright line** now names the maintainer:

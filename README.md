@@ -12,9 +12,9 @@
 
 Agent Disco turns ambiguous feature ideas into specs your AI coding agent can ship from. The output is a durable folder of Markdown that PM, Engineering, QA, and the implementing agent all consume from the same source of truth.
 
-**The problem.** Adding a feature to a large existing codebase is hard, and the hard part is rarely the writing — it's the *context*. An implementing agent landing in a 500k-line monorepo needs to know which 30 files matter, what types they expose, what patterns to follow, and what the team already decided. Without that, agents hallucinate types, pick wrong abstractions, break adjacent code, and rebuild components that already exist. Dumping the whole repo into context is expensive and noisy; agentic search is unreliable and leaves no durable record.
+**The problem.** Specs written for humans don't survive contact with AI coding agents. Drop a vague ticket on Cursor or Claude Code and you get hallucinated types, wrong abstractions, broken adjacent code, and components rebuilt from scratch — the agent doesn't know which 30 files in your 500k-line monorepo matter, what patterns to follow, or what the team already decided. The usual workarounds (full-repo retrieval, agentic search) are expensive, noisy, and leave no durable record.
 
-**The answer.** **Semantic maps** — a small set of Markdown artifacts that distill the relevant context once, at known paths, instead of re-discovering it every session.
+**The answer.** Specs in a shape AI coding agents actually execute: **TDD-first contracts** with failing tests written before any code and every requirement traceable to a test assertion, plus **semantic maps** — Markdown artifacts at known paths that distill the relevant codebase context once, instead of re-discovering it every session.
 
 ## Quick Start
 
