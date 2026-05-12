@@ -237,6 +237,10 @@ Both paths converge on the same `SKILL.md` and the same templates. Simon's indus
 
 MIT — see [`LICENSE`](LICENSE).
 
+## Maintainer
+
+Built and maintained by Bryan "Jules" Richard ([@elevationgain](https://github.com/elevationgain)). For substantive changes, please open an issue first to discuss direction; smaller fixes (typos, broken links, clarifications) can go straight to a PR.
+
 ## Contributing
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md).

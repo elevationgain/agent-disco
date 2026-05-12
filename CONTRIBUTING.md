@@ -2,6 +2,8 @@
 
 Contributions are welcome when they make discovery outputs clearer, more complete, and more useful for both humans and coding agents.
 
+Maintained by Bryan "Jules" Richard ([@elevationgain](https://github.com/elevationgain)). For substantive changes, please open an issue first to discuss direction so we don't build past each other; smaller fixes (typos, broken links, clarifications) can go straight to a PR.
+
 ## What This Project Is
 
 - A reusable skill for structured product discovery

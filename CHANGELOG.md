@@ -68,6 +68,22 @@ open a new empty `[Unreleased]` section above it.
   in the `## Notes for Cursor` block of `activation/cursor/load-disco.md`
   and the equivalent headers of the Cursor persona files.
 
+### Changed — Attribution
+
+- **`LICENSE` copyright line** now names the maintainer:
+  `Copyright (c) 2026 Bryan "Jules" Richard and Agent Disco contributors`.
+  The trailing `and Agent Disco contributors` preserves room for future
+  external commits without requiring a relicensing pass.
+- **`README.md` adds a `## Maintainer` section** between `## License` and
+  `## Contributing`, naming Bryan "Jules" Richard
+  ([@elevationgain](https://github.com/elevationgain)) and setting
+  expectations for would-be contributors (open an issue first for
+  substantive changes; small fixes can go straight to a PR).
+- **`CONTRIBUTING.md` adds a maintainer one-liner** below the opening
+  welcome paragraph, mirroring the README's coordination expectation so
+  external contributors get the same signal whether they enter from the
+  README or the contributing guide.
+
 ## [0.2.0] - 2026-05-11
 
 First post-release iteration. Adds the **Plan** phase, bundles a **dashboard build skill** (Coral Pulse + Dark Indigo themes), restructures the README around workflow phases, swaps the workflow Mermaid for theme-aware SVGs, migrates the logo to SVG, and ships a worked example with a screencap-ready dashboard.
